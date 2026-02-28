@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   ADBLOCK DEFINITIVO - EDIT WITH BASE44
+   ======================================== */
+
+/* Esconder botão Edit with Base44 - Múltiplas camadas */
+button[title*="edit with base44"],
+button[title*="Edit with base44"],
+button[title*="EDIT WITH BASE44"],
+button[aria-label*="edit with base44"],
+button[aria-label*="Edit with base44"],
+.base44-edit-button,
+[data-base44-edit],
+[data-base44-editor],
+[class*="base44-edit"],
+[id*="base44-edit"],
+button:has(svg[data-base44-icon]),
+a[href*="base44.app/edit"],
+a[href*="base44.app/editor"],
+div[class*="base44-branding"],
+div[id*="base44-branding"],
+button[class*="base44"],
+a[class*="base44-edit"],
+div[class*="base44-editor"],
+/* Novos seletores mais agressivos */
+button[style*="position: fixed"][style*="bottom"],
+button[style*="position: fixed"][style*="right"],
+div[style*="z-index: 999"],
+div[style*="z-index: 9999"],
+iframe[src*="base44"],
+[data-radix-portal] button[title*="edit"],
+[data-radix-portal] button[title*="Edit"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  clip: rect(0, 0, 0, 0) !important;
+  overflow: hidden !important;
+}
+
+/* Print styles */
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+  
+  .print\:border-none {
+    border: none !important;
+  }
+  
+  .print\:p-8 {
+    padding: 2rem !important;
+  }
+  
+  .print\:max-w-none {
+    max-width: none !important;
+  }
+  
+  .print\:w-full {
+    width: 100% !important;
+  }
+  
+  .print\:h-auto {
+    height: auto !important;
+  }
+  
+  .print\:rounded-none {
+    border-radius: 0 !important;
+  }
+  
+  @page {
+    margin: 1cm;
+  }
+  
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

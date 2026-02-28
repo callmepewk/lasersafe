@@ -1,0 +1,23 @@
+export const laserTechOptions = [
+  { value: "Nd:YAG 1064nm", label: "Nd:YAG 1064nm", depth: "4-6mm" },
+  { value: "Alexandrite 755nm", label: "Alexandrite 755nm", depth: "2-3mm" },
+  { value: "Diodo 808nm", label: "Diodo 808nm", depth: "2-5mm" },
+  { value: "Diodo 810nm", label: "Diodo 810nm", depth: "2-5mm" },
+  { value: "CO2 10600nm", label: "CO2 10600nm", depth: "0,1-1mm" },
+  { value: "Er:YAG 2940nm", label: "Er:YAG 2940nm", depth: "0,05-0,5mm" },
+  { value: "Er:YSGG 2790nm", label: "Er:YSGG 2790nm", depth: "0,05-0,4mm" },
+  { value: "Thulium 1927nm", label: "Thulium 1927nm", depth: "0,2-0,8mm" },
+  { value: "PDL 585nm", label: "PDL 585nm", depth: "0,5-1,5mm" },
+  { value: "PDL 595nm", label: "PDL 595nm", depth: "0,5-1,5mm" },
+  { value: "KTP 532nm", label: "KTP 532nm", depth: "0,5-1mm" },
+  { value: "Rubi 694nm", label: "Rubi 694nm", depth: "1-2mm" },
+  { value: "Picosecond 755nm", label: "Picosecond 755nm", depth: "0,8-2mm" },
+  { value: "Picosecond 1064nm", label: "Picosecond 1064nm", depth: "0,8-2mm" },
+  { value: "NIR 1440nm", label: "NIR 1440nm", depth: "1-3mm" },
+  { value: "NIR 1550nm", label: "NIR 1550nm", depth: "1-3mm" },
+  { value: "IPL 500-1200nm", label: "IPL 500-1200nm", depth: "variável" },
+  { value: "Triplo Waves (755-808-1064nm)", label: "Triplo Waves (755-808-1064nm)", depth: "2-6mm" },
+  { value: "Radiofrequência", label: "Radiofrequência", depth: "3-20mm" },
+  { value: "HIFU", label: "HIFU (Ultrassom Microfocado)", depth: "1,5-4,5mm" },
+  { value: "Outro", label: "Outro", depth: "-" }
+];
