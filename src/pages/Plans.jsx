@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Layers, Check, Star, TrendingUp, Loader } from 'lucide-react';
+import { Layers, Check, Star, TrendingUp, Loader, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useTranslation } from '@/components/i18n/TranslationContext';
@@ -178,6 +178,12 @@ export default function Plans() {
                       <Badge className={`mx-auto mb-3 ${plan.name === 'Pro' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
                         {plan.badge}
                       </Badge>
+                    )}
+                    {currentPlan?.name === 'Free' && plan.name === 'Pro' && (
+                      <div className="flex items-center justify-center gap-2 text-blue-600 mb-2">
+                        <ArrowRight className="w-4 h-4" />
+                        <span className="text-xs font-medium">Sugerido: evolua do Free</span>
+                      </div>
                     )}
                     <CardTitle className="text-2xl md:text-3xl font-bold">{plan.name}</CardTitle>
                     <p className="text-xl md:text-2xl font-semibold text-slate-800 mt-2">{plan.price}</p>
