@@ -324,7 +324,7 @@ export default function History() {
                           <AlertDialogCancel>{tr.cancel}</AlertDialogCancel>
                           {currentUser?.role === 'admin' && (
                             <AlertDialogAction onClick={() => { setAdminViewCleared(true); localStorage.setItem('adminHistoryViewCleared','1'); }} className="bg-slate-600 hover:bg-slate-700">
-                              Limpar Minha Visualiza e7 e3o
+                              Limpar Minha Visualização (admin)
                             </AlertDialogAction>
                           )}
                           <AlertDialogAction onClick={handleClearHistory} className="bg-red-600 hover:bg-red-700">{tr.yesDeleteAll}</AlertDialogAction>

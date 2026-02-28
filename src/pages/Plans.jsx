@@ -86,6 +86,20 @@ export default function Plans() {
   }
 
   const userPlanName = currentUser?.current_plan || 'Essencial';
+  const lowerPlans = (name => {
+    const current = allPlans.find(p => p.name === name) || allPlans[0];
+    return allPlans.filter(p => p.level < current.level);
+  })(userPlanName);
+
+  const handleChangePlan = async (planName) => {
+    try {
+      await base44.auth.updateMe({ current_plan: planName });
+      setCurrentUser(prev => ({ ...prev, current_plan: planName }));
+      alert('Plano atualizado para ' + planName);
+    } catch (e) {
+      alert('Falha ao atualizar plano.');
+    }
+  };
   const currentPlan = allPlans.find(p => p.name === userPlanName);
   const availableUpgrades = allPlans.filter(p => p.level > (currentPlan?.level || 1));
   const isMaxPlan = availableUpgrades.length === 0;
@@ -196,6 +210,47 @@ export default function Plans() {
         </div>
       )}
 
+      {/* Downgrade Disponível */}
+      {lowerPlans.length > 0 && (
+        <div className="mt-12">
+          <div className="flex items-center gap-2 mb-6">
+            <TrendingUp className="w-6 h-6 text-slate-600 rotate-180" />
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Downgrade do Seu Plano</h2>
+          </div>
+          <p className="text-slate-600 mb-8 text-base md:text-lg">
+            Prefere um plano mais simples? Você pode mudar a qualquer momento.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            {lowerPlans.map((plan, index) => (
+              <motion.div key={plan.name} initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.1 }}>
+                <Card className="bg-white/90 backdrop-blur-sm shadow-xl border-0 h-full flex flex-col">
+                  <CardHeader className="text-center pt-6 md:pt-8 pb-4">
+                    <CardTitle className="text-2xl md:text-3xl font-bold">{plan.name}</CardTitle>
+                    <p className="text-xl md:text-2xl font-semibold text-slate-800 mt-2">{plan.price}</p>
+                    <p className="text-xs md:text-sm text-slate-500 mt-1">{plan.description}</p>
+                  </CardHeader>
+                  <CardContent className="p-6 md:p-8 flex-grow">
+                    <ul className="space-y-3">
+                      {plan.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start">
+                          <Check className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-1" />
+                          <span className="text-sm md:text-base text-slate-700">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter className="p-6 md:p-8 pt-0">
+                    <Button className={`w-full text-base md:text-lg py-5 md:py-6 bg-slate-700 hover:bg-slate-800`} onClick={() => handleChangePlan(plan.name)}>
+                      Mudar para {plan.name}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {isMaxPlan && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -207,7 +262,7 @@ export default function Plans() {
           </div>
           <h3 className="text-2xl font-bold text-slate-900 mb-2">{t("plans.maxPlan", "Você está no plano máximo!")}</h3>
           <p className="text-slate-600 text-lg">
-            {t("plans.maxPlanDescription", "Aproveite todos os recursos ilimitados do LaserCode Master.")}
+            {t("plans.maxPlanDescription", "Aproveite todos os recursos ilimitados do LaserSafe Master.")}
           </p>
         </motion.div>
       )}

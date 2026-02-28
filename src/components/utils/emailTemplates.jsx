@@ -144,7 +144,7 @@ export const createEmailTemplate = (content) => `
 <body>
   <div class="email-container">
     <div class="email-header">
-      <div class="email-logo">LaserCode</div>
+      <div class="email-logo">LaserSafe</div>
       <div class="email-subtitle">Sistema Inteligente de Cálculo de Parâmetros Laser</div>
     </div>
     <div class="email-body">
@@ -152,8 +152,8 @@ export const createEmailTemplate = (content) => `
     </div>
     <div class="email-footer">
       <div class="footer-text">
-        <strong>LaserCode</strong> - Tecnologia de ponta para profissionais de saúde<br>
-        © ${new Date().getFullYear()} LaserCode. Todos os direitos reservados.<br><br>
+        <strong>LaserSafe</strong> - Tecnologia de ponta para profissionais de saúde<br>
+        © ${new Date().getFullYear()} LaserSafe. Todos os direitos reservados.<br><br>
         <a href="#" class="unsubscribe-link">Cancelar assinatura de emails</a>
       </div>
     </div>
@@ -164,7 +164,7 @@ export const createEmailTemplate = (content) => `
 
 // Template: Boas-vindas Trial
 export const welcomeTrialEmail = (name, email, password, endDate) => createEmailTemplate(`
-  <div class="greeting">🎉 Bem-vindo ao LaserCode!</div>
+  <div class="greeting">🎉 Bem-vindo ao LaserSafe!</div>
   
   <div class="content-section">
     Olá <strong>${name}</strong>!
@@ -190,7 +190,7 @@ export const welcomeTrialEmail = (name, email, password, endDate) => createEmail
   </div>
   
   <div style="text-align: center;">
-    <a href="https://lasercode.app" class="cta-button">🚀 Acessar LaserCode Agora</a>
+    <a href="https://lasercode.app" class="cta-button">🚀 Acessar LaserSafe Agora</a>
   </div>
   
   <div class="content-section">
@@ -226,7 +226,7 @@ export const welcomeTrialEmail = (name, email, password, endDate) => createEmail
   
   <div class="content-section">
     <strong>Atenciosamente,</strong><br>
-    Equipe LaserCode
+    Equipe LaserSafe
   </div>
 `);
 
@@ -243,7 +243,7 @@ export const extendTrialEmail = (name, days, newEndDate) => createEmailTemplate(
   </div>
   
   <div class="content-section">
-    Seu período de teste no LaserCode foi <strong>ESTENDIDO</strong> por mais <strong>${days} dias</strong>!
+    Seu período de teste no LaserSafe foi <strong>ESTENDIDO</strong> por mais <strong>${days} dias</strong>!
   </div>
   
   <div class="info-box">
@@ -254,7 +254,7 @@ export const extendTrialEmail = (name, days, newEndDate) => createEmailTemplate(
   </div>
   
   <div style="text-align: center;">
-    <a href="https://lasercode.app" class="cta-button">Continuar Usando LaserCode</a>
+    <a href="https://lasercode.app" class="cta-button">Continuar Usando LaserSafe</a>
   </div>
   
   <div class="content-section">
@@ -263,7 +263,7 @@ export const extendTrialEmail = (name, days, newEndDate) => createEmailTemplate(
   
   <div class="content-section">
     <strong>Atenciosamente,</strong><br>
-    Equipe LaserCode
+    Equipe LaserSafe
   </div>
 `);
 
@@ -280,7 +280,7 @@ export const accountActivatedEmail = (name) => createEmailTemplate(`
   </div>
   
   <div class="content-section">
-    Sua conta de teste foi <strong>CONVERTIDA</strong> para uma conta regular no LaserCode!
+    Sua conta de teste foi <strong>CONVERTIDA</strong> para uma conta regular no LaserSafe!
   </div>
   
   <div class="info-box">
@@ -300,7 +300,7 @@ export const accountActivatedEmail = (name) => createEmailTemplate(`
   </div>
   
   <div class="content-section">
-    Continue aproveitando todos os recursos do LaserCode sem limites!
+    Continue aproveitando todos os recursos do LaserSafe sem limites!
   </div>
   
   <div class="content-section">
@@ -309,7 +309,7 @@ export const accountActivatedEmail = (name) => createEmailTemplate(`
   
   <div class="content-section">
     <strong>Atenciosamente,</strong><br>
-    Equipe LaserCode
+    Equipe LaserSafe
   </div>
 `);
 
@@ -322,7 +322,7 @@ export const accountClosedEmail = (name) => createEmailTemplate(`
   </div>
   
   <div class="content-section">
-    Informamos que sua conta de teste no LaserCode foi encerrada.
+    Informamos que sua conta de teste no LaserSafe foi encerrada.
   </div>
   
   <div class="content-section">
@@ -334,12 +334,12 @@ export const accountClosedEmail = (name) => createEmailTemplate(`
   </div>
   
   <div class="content-section">
-    Agradecemos por ter testado o LaserCode!
+    Agradecemos por ter testado o LaserSafe!
   </div>
   
   <div class="content-section">
     <strong>Atenciosamente,</strong><br>
-    Equipe LaserCode
+    Equipe LaserSafe
   </div>
 `);
 
@@ -352,7 +352,7 @@ export const systemUpdateEmail = (name, siteUrl = "https://lasercode.app") => cr
   </div>
   
   <div class="content-section">
-    O sistema LaserCode foi <strong>atualizado</strong> com novas funcionalidades e melhorias!
+    O sistema LaserSafe foi <strong>atualizado</strong> com novas funcionalidades e melhorias!
   </div>
   
   <div class="content-section">
@@ -380,7 +380,7 @@ export const systemUpdateEmail = (name, siteUrl = "https://lasercode.app") => cr
   </div>
   
   <div style="text-align: center;">
-    <a href="${siteUrl}" class="cta-button">🚀 Acessar LaserCode Atualizado</a>
+    <a href="${siteUrl}" class="cta-button">🚀 Acessar LaserSafe Atualizado</a>
   </div>
   
   <div class="content-section">
@@ -389,7 +389,7 @@ export const systemUpdateEmail = (name, siteUrl = "https://lasercode.app") => cr
   
   <div class="content-section">
     <strong>Atenciosamente,</strong><br>
-    Equipe LaserCode
+    Equipe LaserSafe
   </div>
 `);
 
@@ -406,12 +406,12 @@ export const customNotificationEmail = (name, title, message) => createEmailTemp
   </div>
   
   <div style="text-align: center;">
-    <a href="https://lasercode.app" class="cta-button">Acessar LaserCode</a>
+    <a href="https://lasercode.app" class="cta-button">Acessar LaserSafe</a>
   </div>
   
   <div class="content-section">
     <strong>Atenciosamente,</strong><br>
-    Equipe LaserCode
+    Equipe LaserSafe
   </div>
 `);
 
@@ -424,7 +424,7 @@ export const accountDeletedEmail = (name, email, date) => createEmailTemplate(`
   </div>
   
   <div class="content-section">
-    Informamos que sua conta no LaserCode foi <strong>encerrada</strong> pelos administradores do sistema.
+    Informamos que sua conta no LaserSafe foi <strong>encerrada</strong> pelos administradores do sistema.
   </div>
   
   <div class="info-box">
@@ -456,6 +456,6 @@ export const accountDeletedEmail = (name, email, date) => createEmailTemplate(`
   
   <div class="content-section">
     <strong>Atenciosamente,</strong><br>
-    Equipe LaserCode
+    Equipe LaserSafe
   </div>
 `);

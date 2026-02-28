@@ -12,6 +12,7 @@ import BodyRegionSelector from "./BodyRegionSelector";
 import DeviceIdentifier from "./DeviceIdentifier";
 import { targetTypes } from "./laserDatabase";
 import { laserTechOptions } from "./laserTechOptions";
+import { base44 } from "@/api/base44Client";
 
 const calculateAge = (birthDate) => {
   if (!birthDate) return null;
@@ -173,8 +174,49 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
     pulse_width_ms: "",
     scan_mode: ""
   });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [aiSuggestions, setAiSuggestions] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
-  const handleInputChange = (field, value) => {
+  useEffect(() => { (async () => { try { const u = await base44.auth.me(); setCurrentUser(u); } catch(e){} })(); }, []);
+
+  const suggestWithAI = async () => {
+    setAiLoading(true);
+    try {
+      const prompt = `Você é um especialista em lasers dermatológicos. Gere parâmetros iniciais seguros e eficazes com base nos dados abaixo.
+  Dados do caso:
+  ${JSON.stringify({
+  procedure_type: assessment.procedure_type,
+  region: assessment.region,
+  phototype: assessment.phototype,
+  skin_color: assessment.skin_color,
+  skin_sensitivity: assessment.skin_sensitivity,
+  target_type: assessment.target_type,
+  laser_type: assessment.laser_type === 'Outro' ? assessment.other_laser_type : assessment.laser_type,
+  aggressiveness_level: assessment.aggressiveness_level,
+  depth_level: assessment.depth_level,
+  fluence_unit: assessment.fluence_unit
+  })}
+  Responda em JSON.`;
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            fluence: { type: 'string' },
+            pulse_duration: { type: 'string' },
+            spot_size: { type: 'string' },
+            frequency: { type: 'string' },
+            cooling_intensity: { type: 'string' },
+            rationale: { type: 'string' }
+          }
+        }
+      });
+      setAiSuggestions(res);
+    } finally { setAiLoading(false); }
+  };
+
+   const handleInputChange = (field, value) => {
     setAssessment(prev => {
       const updated = { ...prev, [field]: value };
       
@@ -618,7 +660,40 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
         </CardContent>
       </Card>
 
-      <BodyRegionSelector
+      {/* Sugestão de IA (Plano Master) */}
+      {currentUser?.current_plan === 'Master' && (
+        <Card className="bg-indigo-50 border-indigo-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-indigo-900">
+              <Brain className="w-5 h-5" /> Sugestão de Parâmetros por IA (Master)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Button type="button" onClick={suggestWithAI} disabled={aiLoading} className="bg-indigo-600 hover:bg-indigo-700">
+                {aiLoading ? 'Gerando...' : 'Sugerir com IA'}
+              </Button>
+              <p className="text-sm text-indigo-800">As sugestões são auxiliares. A decisão final é do profissional.</p>
+            </div>
+            {aiSuggestions && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Fluência</p><p className="font-bold">{aiSuggestions.fluence}</p></div>
+                <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Pulso</p><p className="font-bold">{aiSuggestions.pulse_duration}</p></div>
+                <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Spot</p><p className="font-bold">{aiSuggestions.spot_size}</p></div>
+                <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Frequência</p><p className="font-bold">{aiSuggestions.frequency}</p></div>
+                <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Resfriamento</p><p className="font-bold">{aiSuggestions.cooling_intensity}</p></div>
+              </div>
+            )}
+            {aiSuggestions?.rationale && (
+              <div className="text-sm text-indigo-900 bg-indigo-100/70 p-3 rounded">
+                <strong>Por que:</strong> {aiSuggestions.rationale}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+       <BodyRegionSelector
         selectedRegion={assessment.body_region}
         onRegionChange={(region) => handleInputChange("body_region", region)}
         regionPhoto={assessment.region_photo}

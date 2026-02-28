@@ -192,7 +192,7 @@ Ordene por relevância para a busca.`,
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="patient">Paciente *</Label>
-          <Select value={formData.patient_id} onValueChange={(value) => setFormData({ ...formData, patient_id: value })}>
+          <Select value={formData.patient_id} onValueChange={(value) => setFormData({ ...formData, patient_id: value, patient_name: '' })}>
             <SelectTrigger id="patient">
               <SelectValue placeholder="Selecione o paciente" />
             </SelectTrigger>
@@ -202,11 +202,19 @@ Ordene por relevância para a busca.`,
               ))}
             </SelectContent>
           </Select>
+          <div className="mt-2">
+            <Input
+              placeholder="Ou digite o nome completo do paciente"
+              value={formData.patient_name}
+              onChange={(e) => setFormData({ ...formData, patient_name: e.target.value, patient_id: '' })}
+            />
+            <p className="text-xs text-slate-500 mt-1">Opcional: preencha o nome diretamente se o paciente ainda não estiver cadastrado.</p>
+          </div>
         </div>
 
         <div>
           <Label htmlFor="professional">Profissional *</Label>
-          <Select value={formData.professional_id} onValueChange={(value) => setFormData({ ...formData, professional_id: value })}>
+          <Select value={formData.professional_id} onValueChange={(value) => setFormData({ ...formData, professional_id: value, professional_name: '' })}>
             <SelectTrigger id="professional">
               <SelectValue placeholder="Selecione o profissional" />
             </SelectTrigger>
@@ -216,6 +224,14 @@ Ordene por relevância para a busca.`,
               ))}
             </SelectContent>
           </Select>
+          <div className="mt-2">
+            <Input
+              placeholder="Ou digite o nome do profissional"
+              value={formData.professional_name}
+              onChange={(e) => setFormData({ ...formData, professional_name: e.target.value, professional_id: '' })}
+            />
+            <p className="text-xs text-slate-500 mt-1">Opcional: preencha o nome diretamente se o profissional não estiver cadastrado.</p>
+          </div>
         </div>
       </div>
 

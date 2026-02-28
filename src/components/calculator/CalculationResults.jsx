@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import PostCareRecommendations from "./PostCareRecommendations";
+import InteractiveExplanation from "./InteractiveExplanation";
 
 const ParameterInput = ({ label, name, value, unit, onChange, originalValue }) => (
     <div>
@@ -204,6 +205,9 @@ export default function CalculationResults({ patient, professional, assessment, 
               </CardContent>
           </Card>
       )}
+
+      {/* Explicação Interativa */}
+      <InteractiveExplanation assessment={assessment} params={adjustedParams} />
 
       {/* Manchester Protocol Safety Alert */}
       <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 print:shadow-none print:border-none">
