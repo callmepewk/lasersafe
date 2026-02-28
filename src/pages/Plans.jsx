@@ -10,27 +10,25 @@ import PageBlockChecker from '../components/system/PageBlockChecker';
 
 const allPlans = [
   {
-    name: 'Essencial',
-    price: 'R$997',
-    description: 'Ideal para profissionais autônomos iniciando com laser.',
+    name: 'Free',
+    price: 'Grátis',
+    description: 'Plano gratuito com recursos essenciais.',
     features: [
       'Até 20 cálculos/mês',
-      'Cadastro de Pacientes',
-      'Cadastro de Profissionais',
-      'Histórico de Cálculos',
-      'Suporte via Email'
+      'Funções básicas do app',
+      'Suporte pelo site (sem e-mail)'
     ],
     level: 1,
     buttonClass: "bg-slate-700 hover:bg-slate-800",
-    link: "https://pay.hotmart.com/P102484576Y?off=kdc4kwyz&checkoutMode=10"
+    link: ""
   },
   {
     name: 'Pro',
-    price: 'R$1997',
+    price: 'R$19,90',
     description: 'Para profissionais com volume médio de atendimentos.',
     features: [
       'Até 100 cálculos/mês',
-      'Tudo do plano Essencial',
+      'Tudo do plano Free',
       'Exportação de relatórios (PDF)',
       'Dashboard analítico',
       'Suporte Prioritário'
@@ -38,11 +36,11 @@ const allPlans = [
     level: 2,
     badge: 'Mais Popular',
     buttonClass: "bg-blue-600 hover:bg-blue-700",
-    link: "https://pay.hotmart.com/P102484576Y?off=f76mab34&checkoutMode=10"
+    link: "https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=cc52d4ca2b60495bbdfd62484e3732dd"
   },
   {
     name: 'Master',
-    price: 'R$2297',
+    price: 'Sob consulta',
     description: 'Solução completa para profissionais de alta performance.',
     features: [
       'Cálculos ilimitados',
@@ -54,7 +52,7 @@ const allPlans = [
     level: 3,
     badge: 'Avançado',
     buttonClass: "bg-purple-600 hover:bg-purple-700",
-    link: "https://pay.hotmart.com/P102484576Y?off=rarpfphp&checkoutMode=10"
+    link: "https://wa.me/5521980343873?text=Ol%C3%A1%2C%20desejo%20mais%20informa%C3%A7%C3%B5es%20sobre%20o%20LaserSafe%20Master"
   }
 ];
 
@@ -85,7 +83,7 @@ export default function Plans() {
     );
   }
 
-  const userPlanName = currentUser?.current_plan || 'Essencial';
+  const userPlanName = currentUser?.current_plan || 'Free';
   const lowerPlans = (name => {
     const current = allPlans.find(p => p.name === name) || allPlans[0];
     return allPlans.filter(p => p.level < current.level);
