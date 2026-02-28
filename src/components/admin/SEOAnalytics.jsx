@@ -2,7 +2,6 @@ import React from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, Clock, Users, Gauge, DollarSign, FlaskConical, ListOrdered, Calendar } from "lucide-react";
 
