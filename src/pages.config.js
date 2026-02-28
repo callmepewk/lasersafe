@@ -47,40 +47,40 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AboutUs from './pages/AboutUs';
+import AdminControl from './pages/AdminControl';
+import Calculator from './pages/Calculator';
 import Dashboard from './pages/Dashboard';
 import History from './pages/History';
-import Patients from './pages/Patients';
-import Professionals from './pages/Professionals';
-import Calculator from './pages/Calculator';
-import Reference from './pages/Reference';
-import Plans from './pages/Plans';
-import Support from './pages/Support';
-import Profile from './pages/Profile';
 import NeoFormulas from './pages/NeoFormulas';
-import Tutorial from './pages/Tutorial';
-import TermsAndConditions from './pages/TermsAndConditions';
-import AdminControl from './pages/AdminControl';
-import AboutUs from './pages/AboutUs';
+import Patients from './pages/Patients';
+import Plans from './pages/Plans';
 import Prescriptions from './pages/Prescriptions';
+import Professionals from './pages/Professionals';
+import Profile from './pages/Profile';
+import Reference from './pages/Reference';
+import Support from './pages/Support';
+import TermsAndConditions from './pages/TermsAndConditions';
+import Tutorial from './pages/Tutorial';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "AboutUs": AboutUs,
+    "AdminControl": AdminControl,
+    "Calculator": Calculator,
     "Dashboard": Dashboard,
     "History": History,
-    "Patients": Patients,
-    "Professionals": Professionals,
-    "Calculator": Calculator,
-    "Reference": Reference,
-    "Plans": Plans,
-    "Support": Support,
-    "Profile": Profile,
     "NeoFormulas": NeoFormulas,
-    "Tutorial": Tutorial,
-    "TermsAndConditions": TermsAndConditions,
-    "AdminControl": AdminControl,
-    "AboutUs": AboutUs,
+    "Patients": Patients,
+    "Plans": Plans,
     "Prescriptions": Prescriptions,
+    "Professionals": Professionals,
+    "Profile": Profile,
+    "Reference": Reference,
+    "Support": Support,
+    "TermsAndConditions": TermsAndConditions,
+    "Tutorial": Tutorial,
 }
 
 export const pagesConfig = {

@@ -270,10 +270,8 @@ export default function Dashboard() {
                 <BookOpen className="w-4 h-4 mr-2" /> {t("dashboard.referenceGuide", "Guia de Referência")}
               </Button>
             </Link>
-          </CardContent>
 
-          <CardContent className="mt-2">
-            <a href="https://mapa-da-estetica.base44.app" target="_blank" rel="noopener noreferrer" className="block w-full">
+            <a href="https://mapa-da-estetica.base44.app" target="_blank" rel="noopener noreferrer" className="sm:col-span-2">
               <div className="w-full rounded-lg border border-emerald-200 bg-emerald-50 p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 hover:bg-emerald-100 transition-colors">
                 <div className="text-emerald-700 font-semibold">Seja referência na sua região</div>
                 <div className="text-sm text-emerald-800 flex-1">Patrocínio: Mapa da Estética — crie seu perfil verificado, ganhe visibilidade regional e atraia pacientes qualificados.</div>
@@ -281,6 +279,8 @@ export default function Dashboard() {
               </div>
             </a>
           </CardContent>
+
+
         </Card>
       </div>
 

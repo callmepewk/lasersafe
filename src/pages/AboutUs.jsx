@@ -25,19 +25,19 @@ export default function AboutUs() {
       image: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68cc60a6e0333ee14c886a23/0868c4f1b_clubeimg.jpeg"
     },
     {
-      name: "Dr. Spok PD",
-      description: "Assistente inteligente para diagnóstico e planejamento dermatológico. IA avançada para apoio clínico.",
-      url: "https://dr-spok-pd.base44.app",
+      name: "DermaHelp",
+      description: "Assistente inteligente para dúvidas rápidas e suporte dermatológico.",
+      url: "https://dermahelp.base44.app",
       icon: Sparkles,
-      color: "from-purple-500 to-purple-600",
+      color: "from-indigo-500 to-indigo-600",
       image: null
     },
     {
-      name: "Eccellenza",
-      description: "Plataforma premium para gestão de clínicas de estética. Controle completo de pacientes, agendamentos e procedimentos.",
-      url: "https://eccellenza.base44.app",
-      icon: Award,
-      color: "from-emerald-500 to-emerald-600",
+      name: "Celeiro Digital",
+      description: "Plataforma de crescimento e presença digital para clínicas e profissionais.",
+      url: "https://celeirodigital.base44.app",
+      icon: TrendingUp,
+      color: "from-amber-500 to-orange-600",
       image: null
     }
   ];
