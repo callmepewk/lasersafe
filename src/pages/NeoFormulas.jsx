@@ -706,7 +706,7 @@ export default function NeoFormulas() {
           <FlaskConical className="w-5 h-5 md:w-6 md:h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Fórmulas Neo</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Fórmulas Magistrais</h1>
           <p className="text-slate-600 text-sm md:text-lg">Compêndio de fórmulas magistrais dermatológicas</p>
         </div>
       </div>

@@ -77,7 +77,7 @@ function LayoutContent({ children, currentPageName }) {
       icon: FileClock,
     },
     {
-      title: t("nav.formulas", "Fórmulas Neo"),
+      title: t("nav.formulas", "Fórmulas Magistrais"),
       url: createPageUrl("NeoFormulas"),
       icon: FlaskConical,
     },
@@ -123,6 +123,20 @@ function LayoutContent({ children, currentPageName }) {
     if (lastSeenVersion !== UPDATE_VERSION) {
       setShowUpdatesModal(true);
     }
+  }, []);
+
+  // Rebrand: update document title and og:title
+  React.useEffect(() => {
+    try {
+      document.title = 'LaserSafe';
+      let og = document.querySelector('meta[property="og:title"]');
+      if (!og) {
+        og = document.createElement('meta');
+        og.setAttribute('property', 'og:title');
+        document.head.appendChild(og);
+      }
+      og.setAttribute('content', 'LaserSafe');
+    } catch (e) { /* noop */ }
   }, []);
 
   const getInitials = (name) => {
