@@ -146,7 +146,7 @@ export default function Dashboard() {
             <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
               {loading ? t("dashboard.welcome", "Bem-vindo!") : `${t("dashboard.welcomeName", "Bem-vindo")}, ${getFirstName(currentUser?.full_name)}!`}
             </h1>
-            <p className="text-slate-600 text-sm md:text-lg">{t("dashboard.subtitle", "Seu resumo diário no LaserCode")}</p>
+            <p className="text-slate-600 text-sm md:text-lg">{t("dashboard.subtitle", "Seu resumo diário no LaserSafe")}</p>
           </div>
           {!loading && (
             <Link to={createPageUrl("Profile")}>

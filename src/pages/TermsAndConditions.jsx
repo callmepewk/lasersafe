@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Gavel, ShieldCheck, AlertTriangle } from 'lucide-react';
@@ -22,7 +21,7 @@ export default function TermsAndConditions() {
             <CardTitle className="flex items-center gap-2 text-base sm:text-lg"><Gavel className="w-5 h-5 flex-shrink-0" />1. Aceitação dos Termos</CardTitle>
           </CardHeader>
           <CardContent className="prose prose-sm sm:prose-base max-w-none p-4 sm:p-6">
-            <p>Ao acessar e utilizar o aplicativo LaserCode ("Aplicativo"), você ("Usuário") concorda em cumprir e estar vinculado a estes Termos e Condições de Uso ("Termos"). Se você não concordar com estes Termos, não deverá utilizar o Aplicativo.</p>
+            <p>Ao acessar e utilizar o aplicativo LaserSafe ("Aplicativo"), você ("Usuário") concorda em cumprir e estar vinculado a estes Termos e Condições de Uso ("Termos"). Se você não concordar com estes Termos, não deverá utilizar o Aplicativo.</p>
           </CardContent>
         </Card>
 
@@ -31,7 +30,7 @@ export default function TermsAndConditions() {
             <CardTitle className="flex items-center gap-2 text-amber-900 text-base sm:text-lg"><AlertTriangle className="w-5 h-5 flex-shrink-0" />2. Objeto do Aplicativo e Responsabilidade Profissional</CardTitle>
           </CardHeader>
           <CardContent className="prose prose-sm sm:prose-base max-w-none p-4 sm:p-6">
-            <p>O LaserCode é uma ferramenta de software designada a servir como um <strong>assistente de cálculo</strong> para parâmetros em procedimentos a laser dermatológicos, utilizando algoritmos e inteligência artificial.</p>
+            <p>O LaserSafe é uma ferramenta de software designada a servir como um <strong>assistente de cálculo</strong> para parâmetros em procedimentos a laser dermatológicos, utilizando algoritmos e inteligência artificial.</p>
             <p><strong>Fica expressamente claro que o Aplicativo não é profissionalizante, não capacita, não certifica e não habilita qualquer indivíduo a realizar procedimentos.</strong> Ele é uma ferramenta de apoio destinada a profissionais de saúde já qualificados e licenciados.</p>
             <p>A responsabilidade final pela definição dos parâmetros, pela realização do procedimento e por qualquer resultado clínico é <strong>inteira e exclusivamente do profissional de saúde</strong>. O julgamento clínico, a avaliação presencial do paciente e a experiência profissional são soberanos e nunca devem ser substituídos pelas sugestões do Aplicativo.</p>
           </CardContent>
