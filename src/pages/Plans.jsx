@@ -202,9 +202,15 @@ export default function Plans() {
                   <CardFooter className="p-6 md:p-8 pt-0">
                     <Button 
                       className={`w-full text-base md:text-lg py-5 md:py-6 ${plan.buttonClass}`}
-                      onClick={() => window.open(plan.link, '_blank')}
+                      onClick={() => {
+                        if (plan.name === 'Pro') {
+                          window.open(plan.link, '_blank');
+                        } else if (plan.name === 'Master') {
+                          window.open(plan.link, '_blank');
+                        }
+                      }}
                     >
-                      {t("plans.upgrade", "Fazer Upgrade")}
+                      {plan.name === 'Pro' ? t("plans.upgrade", "Fazer Upgrade") : 'Falar no WhatsApp'}
                     </Button>
                   </CardFooter>
                 </Card>
