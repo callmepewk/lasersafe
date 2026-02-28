@@ -1,39 +1,60 @@
-**Welcome to your Base44 project** 
+# 🔬 LaserSafe
 
-**About**
+Plataforma profissional para avaliação de viabilidade laser, gestão clínica e suporte técnico para profissionais da área estética.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+🌐 Produção: https://lasersafe.base44.app
 
-This project contains everything you need to run your app locally.
+---
 
-**Edit the code in your local development environment**
+## 📌 Visão Geral
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+O LaserSafe é uma aplicação web desenvolvida para:
 
-**Prerequisites:** 
+- Avaliação de viabilidade de procedimentos a laser
+- Gestão de pacientes
+- Gestão de prescrições
+- Painel administrativo
+- Controle de planos e permissões
+- Sistema multilíngue
+- Sistema de atualizações e bloqueios
 
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
+---
 
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
+## 🏗️ Arquitetura do Projeto
 
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
-```
+Projeto desenvolvido em:
 
-Run the app: `npm run dev`
+- React
+- Vite
+- TailwindCSS
+- Context API
+- Query Client
+- Estrutura modular baseada em componentes
 
-**Publish your changes**
+---
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+## 📂 Estrutura de Pastas
 
-**Docs & Support**
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+src/
+├── api/
+├── components/
+│ ├── admin/
+│ ├── auth/
+│ ├── calculator/
+│ ├── dashboard/
+│ ├── i18n/
+│ ├── patients/
+│ ├── prescriptions/
+│ ├── professionals/
+│ ├── shared/
+│ ├── system/
+│ ├── ui/
+│ ├── updates/
+│ └── utils/
+├── hooks/
+├── lib/
+├── pages/
+└── utils/
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+
