@@ -174,7 +174,7 @@ export default function AdminControl() {
       const siteUrl = window.location.origin;
       await sendEmailsInBatches(users, (user) => 
         base44.integrations.Core.SendEmail({
-          from_name: "LaserCode - Sistema",
+          from_name: "LaserSafe - Sistema",
           to: user.email,
           subject: "🔄 Atualização do Sistema - Ação Necessária",
           body: systemUpdateEmail(user.full_name || 'Usuário', siteUrl)
@@ -243,7 +243,7 @@ export default function AdminControl() {
     try {
       await sendEmailsInBatches(users, (user) =>
         base44.integrations.Core.SendEmail({
-          from_name: "LaserCode - Novidades",
+          from_name: "LaserSafe - Novidades",
           to: user.email,
           subject: `📢 ${notificationTitle}`,
           body: customNotificationEmail(user.full_name || 'Usuário', notificationTitle, notificationMessage)
@@ -356,9 +356,9 @@ export default function AdminControl() {
     try {
       // Enviar email com template HTML
       await base44.integrations.Core.SendEmail({
-        from_name: "LaserCode - Sistema",
+        from_name: "LaserSafe - Sistema",
         to: userToDelete.email,
-        subject: "Conta Encerrada - LaserCode",
+        subject: "Conta Encerrada - LaserSafe",
         body: accountDeletedEmail(
           userToDelete.full_name || 'Usuário',
           userToDelete.email,
@@ -407,7 +407,7 @@ export default function AdminControl() {
     setIsSendingEmail(true);
     try {
       await base44.integrations.Core.SendEmail({
-        from_name: "LaserCode - Administração",
+        from_name: "LaserSafe - Administração",
         to: emailRecipient.email,
         subject: emailSubject,
         body: emailBody
@@ -454,7 +454,7 @@ export default function AdminControl() {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Relatório Geral - LaserCode</title>
+        <title>Relatório Geral - LaserSafe</title>
         <style>
           body { font-family: Arial, sans-serif; padding: 40px; }
           h1 { color: #1e293b; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; }
@@ -470,7 +470,7 @@ export default function AdminControl() {
         </style>
       </head>
       <body>
-        <h1>📊 Relatório Geral do LaserCode</h1>
+        <h1>📊 Relatório Geral do LaserSafe</h1>
         <p><strong>Data de Geração:</strong> ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
         
         <h2>Estatísticas Gerais</h2>
@@ -528,7 +528,7 @@ export default function AdminControl() {
         </table>
 
         <div class="footer">
-          <p>© ${new Date().getFullYear()} LaserCode - Sistema de Cálculo de Parâmetros Laser</p>
+          <p>© ${new Date().getFullYear()} LaserSafe - Sistema de Cálculo de Parâmetros Laser</p>
           <p>Relatório gerado automaticamente pelo painel administrativo</p>
         </div>
       </body>
