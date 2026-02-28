@@ -207,6 +207,7 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const [adminViewCleared, setAdminViewCleared] = useState(() => (localStorage.getItem('adminHistoryViewCleared') === '1'));
 
   useEffect(() => {
     loadHistory();
@@ -320,9 +321,14 @@ export default function History() {
                   </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                  <AlertDialogCancel>{tr.cancel}</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleClearHistory} className="bg-red-600 hover:bg-red-700">{tr.yesDeleteAll}</AlertDialogAction>
-                  </AlertDialogFooter>
+                          <AlertDialogCancel>{tr.cancel}</AlertDialogCancel>
+                          {currentUser?.role === 'admin' && (
+                            <AlertDialogAction onClick={() => { setAdminViewCleared(true); localStorage.setItem('adminHistoryViewCleared','1'); }} className="bg-slate-600 hover:bg-slate-700">
+                              Limpar Minha Visualiza e7 e3o
+                            </AlertDialogAction>
+                          )}
+                          <AlertDialogAction onClick={handleClearHistory} className="bg-red-600 hover:bg-red-700">{tr.yesDeleteAll}</AlertDialogAction>
+                          </AlertDialogFooter>
               </AlertDialogContent>
           </AlertDialog>
         </CardContent>
@@ -331,8 +337,8 @@ export default function History() {
       <div className="space-y-4">
         {loading ? (
           [1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 w-full" />)
-        ) : filteredCalculations.length > 0 ? (
-          filteredCalculations.map((calc) => (
+        ) : ((currentUser?.role === 'admin' && adminViewCleared) ? [] : filteredCalculations).length > 0 ? (
+          ((currentUser?.role === 'admin' && adminViewCleared) ? [] : filteredCalculations).map((calc) => (
             <Dialog key={calc.id}>
               <Card className="bg-white/90 backdrop-blur-sm shadow-lg border-0 hover:shadow-xl transition-all duration-300 print:hidden overflow-hidden">
                 <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

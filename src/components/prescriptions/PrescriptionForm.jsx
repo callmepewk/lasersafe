@@ -22,7 +22,9 @@ export default function PrescriptionForm({ prescription, onSave, onCancel }) {
 
   const [formData, setFormData] = useState({
     patient_id: prescription?.patient_id || "",
+    patient_name: prescription?.patient_name || "",
     professional_id: prescription?.professional_id || "",
+    professional_name: prescription?.professional_name || "",
     prescription_date: prescription?.prescription_date || new Date().toISOString().split('T')[0],
     diagnosis: prescription?.diagnosis || "",
     observations: prescription?.observations || "",
@@ -160,8 +162,8 @@ Ordene por relevância para a busca.`,
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.patient_id || !formData.professional_id || formData.items.length === 0) {
-      alert('Preencha paciente, profissional e adicione pelo menos 1 item.');
+    if ((!(formData.patient_id || formData.patient_name)) || (!(formData.professional_id || formData.professional_name)) || formData.items.length === 0) {
+      alert('Preencha paciente (ou nome), profissional (ou nome) e adicione pelo menos 1 item.');
       return;
     }
 
@@ -228,19 +230,7 @@ Ordene por relevância para a busca.`,
           />
         </div>
 
-        <div>
-          <Label htmlFor="status">Status</Label>
-          <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-            <SelectTrigger id="status">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="rascunho">Rascunho</SelectItem>
-              <SelectItem value="finalizada">Finalizada</SelectItem>
-              <SelectItem value="enviada">Enviada</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+
       </div>
 
       <div>
@@ -372,7 +362,7 @@ Ordene por relevância para a busca.`,
 
       {/* Botões */}
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={saving}>
+        <Button type="button" variant="outline" onClick={() => onCancel(formData)} disabled={saving}>
           Cancelar
         </Button>
         <Button type="submit" disabled={saving} className="bg-emerald-600 hover:bg-emerald-700">

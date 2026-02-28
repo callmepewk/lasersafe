@@ -94,14 +94,15 @@ export default function Prescriptions() {
   };
 
   const filteredPrescriptions = prescriptions.filter(p => {
-    const patient = patients[p.patient_id];
-    const professional = professionals[p.professional_id];
+    const patientName = (patients[p.patient_id]?.name || p.patient_name || '').toLowerCase();
+    const professionalName = (professionals[p.professional_id]?.name || p.professional_name || '').toLowerCase();
+    const diagnosisText = (p.diagnosis || '').toLowerCase();
     const searchLower = searchTerm.toLowerCase();
     
     return (
-      patient?.name?.toLowerCase().includes(searchLower) ||
-      professional?.name?.toLowerCase().includes(searchLower) ||
-      p.diagnosis?.toLowerCase().includes(searchLower)
+      patientName.includes(searchLower) ||
+      professionalName.includes(searchLower) ||
+      diagnosisText.includes(searchLower)
     );
   });
 
@@ -212,12 +213,12 @@ export default function Prescriptions() {
                         <div className="flex items-center gap-2 text-slate-700">
                           <User className="w-4 h-4 text-emerald-600" />
                           <span className="font-semibold">{t("prescriptions.patient", "Paciente")}:</span>
-                          <span>{patient?.name || 'N/A'}</span>
+                          <span>{patient?.name || prescription.patient_name || 'N/A'}</span>
                         </div>
                         <div className="flex items-center gap-2 text-slate-700">
                           <User className="w-4 h-4 text-blue-600" />
                           <span className="font-semibold">{t("prescriptions.professional", "Profissional")}:</span>
-                          <span>{professional?.name || 'N/A'}</span>
+                          <span>{professional?.name || prescription.professional_name || 'N/A'}</span>
                         </div>
                         {prescription.diagnosis && (
                           <div className="text-sm text-slate-600">
@@ -288,7 +289,21 @@ export default function Prescriptions() {
               setShowCreateModal(false);
               setSelectedPrescription(null);
             }}
-            onCancel={() => {
+            onCancel={async (data) => {
+              if (!selectedPrescription) {
+                const hasContent = (data?.patient_id || data?.patient_name || data?.professional_id || data?.professional_name || data?.diagnosis || (data?.items || []).length > 0);
+                if (hasContent) {
+                  try {
+                    await base44.entities.Prescription.create({
+                      ...data,
+                      status: 'rascunho'
+                    });
+                  } catch (e) {
+                    console.error('Erro ao salvar rascunho:', e);
+                  }
+                }
+              }
+              await loadData();
               setShowCreateModal(false);
               setSelectedPrescription(null);
             }}

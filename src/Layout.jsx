@@ -174,7 +174,7 @@ function LayoutContent({ children, currentPageName }) {
                   <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">LaserCode</h2>
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight truncate">LaserSafe</h2>
                   <p className="text-xs sm:text-sm text-slate-500 truncate">{t("layout.subtitle", "IA assistente de cálculos")}</p>
                 </div>
               </div>
@@ -237,7 +237,7 @@ function LayoutContent({ children, currentPageName }) {
                    <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
                      <Activity className="w-4 h-4 text-white" />
                    </div>
-                   <h1 className="text-lg font-bold text-slate-900 truncate">LaserCode</h1>
+                   <h1 className="text-lg font-bold text-slate-900 truncate">LaserSafe</h1>
                 </div>
                 <div className="flex items-center gap-2">
                   <LanguageSelector variant="ghost" />

@@ -113,7 +113,7 @@ export default function PrescriptionViewer({ prescription, patient, professional
         </div>
 
         <div class="patient-info">
-          <strong>Paciente:</strong> ${patient?.name || 'N/A'}<br>
+          <strong>Paciente:</strong> ${patient?.name || prescription?.patient_name || 'N/A'}<br>
           <strong>CPF:</strong> ${patient?.cpf || 'N/A'}<br>
           <strong>Data de Nascimento:</strong> ${patient?.birth_date ? format(new Date(patient.birth_date), 'dd/MM/yyyy', { locale: ptBR }) : 'N/A'}<br>
           <strong>Telefone:</strong> ${patient?.phone || 'N/A'}
@@ -156,7 +156,7 @@ export default function PrescriptionViewer({ prescription, patient, professional
         </div>
 
         <div class="footer">
-          Este documento foi gerado eletronicamente pelo sistema LaserCode<br>
+          Este documento foi gerado eletronicamente pelo sistema LaserSafe<br>
           Data de emissão: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
         </div>
       </body>
@@ -195,7 +195,7 @@ export default function PrescriptionViewer({ prescription, patient, professional
         <div className="bg-slate-50 p-4 rounded-lg mb-6">
           <h3 className="font-semibold text-slate-900 mb-2">Dados do Paciente</h3>
           <div className="grid grid-cols-2 gap-2 text-sm">
-            <div><strong>Nome:</strong> {patient?.name || 'N/A'}</div>
+            <div><strong>Nome:</strong> {patient?.name || prescription?.patient_name || 'N/A'}</div>
             <div><strong>CPF:</strong> {patient?.cpf || 'N/A'}</div>
             <div><strong>Data Nasc:</strong> {patient?.birth_date ? format(new Date(patient.birth_date), 'dd/MM/yyyy') : 'N/A'}</div>
             <div><strong>Telefone:</strong> {patient?.phone || 'N/A'}</div>
