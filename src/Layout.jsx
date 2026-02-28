@@ -36,11 +36,20 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import UpdatesModal, { UPDATE_VERSION } from '@/components/updates/UpdatesModal';
+import { base44 } from '@/api/base44Client';
 import AdBlocker from '@/components/shared/AdBlocker';
 import UpdateListener from '@/components/system/UpdateListener';
 
 function LayoutContent({ children, currentPageName }) {
   const location = useLocation();
+  const sessionIdRef = React.useRef(() => {
+    const existing = sessionStorage.getItem('session_id');
+    if (existing) return existing;
+    const id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
+    sessionStorage.setItem('session_id', id);
+    return id;
+  })();
+  const pageTimerRef = React.useRef({ path: location.pathname, start: Date.now() });
   const [currentUser, setCurrentUser] = useState(null);
   const [showUpdatesModal, setShowUpdatesModal] = useState(false);
   const { t } = useTranslation();
@@ -138,6 +147,55 @@ function LayoutContent({ children, currentPageName }) {
       og.setAttribute('content', 'LaserSafe');
     } catch (e) { /* noop */ }
   }, []);
+
+  // SEO analytics: page timing and events
+  React.useEffect(() => {
+    const sendEvent = async (event_name, extra = {}) => {
+      try {
+        await base44.entities.AnalyticsEvent.create({
+          event_name,
+          page: location.pathname,
+          duration_ms: extra.duration_ms || 0,
+          session_id: sessionIdRef,
+          user_email: currentUser?.email || null,
+        });
+      } catch (e) { /* ignore */ }
+    };
+    sendEvent('page_view');
+    return () => {
+      const duration = Date.now() - (pageTimerRef.current?.start || Date.now());
+      base44.entities.AnalyticsEvent.create({
+        event_name: 'page_leave',
+        page: pageTimerRef.current?.path || location.pathname,
+        duration_ms: duration,
+        session_id: sessionIdRef,
+        user_email: currentUser?.email || null,
+      });
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const now = Date.now();
+    const prev = pageTimerRef.current;
+    if (prev) {
+      const duration = now - prev.start;
+      base44.entities.AnalyticsEvent.create({
+        event_name: 'page_stay',
+        page: prev.path,
+        duration_ms: duration,
+        session_id: sessionIdRef,
+        user_email: currentUser?.email || null,
+      });
+    }
+    pageTimerRef.current = { path: location.pathname, start: now };
+    base44.entities.AnalyticsEvent.create({
+      event_name: 'page_view',
+      page: location.pathname,
+      duration_ms: 0,
+      session_id: sessionIdRef,
+      user_email: currentUser?.email || null,
+    });
+  }, [location.pathname]);
 
   const getInitials = (name) => {
     if (!name) return 'U';

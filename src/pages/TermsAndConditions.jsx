@@ -85,6 +85,28 @@ export default function TermsAndConditions() {
             <p>Reservamo-nos o direito de modificar estes Termos a qualquer momento. Notificaremos os usuários sobre alterações significativas através do Aplicativo ou por e-mail.</p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">7. Conformidade Regulatória e Diretrizes</CardTitle>
+          </CardHeader>
+          <CardContent className="prose prose-sm sm:prose-base max-w-none p-4 sm:p-6">
+            <ul>
+              <li><strong>ANVISA:</strong> este Aplicativo não substitui registro, rotulagem ou obrigações regulatórias de dispositivos/produtos; o uso clínico segue a RDC aplicável.</li>
+              <li><strong>UNESCO/IA:</strong> adotamos princípios de ética e transparência na IA; as sugestões são auxiliares e não prescritivas.</li>
+              <li><strong>Internacional:</strong> referências gerais a boas práticas (ex.: FDA/EMA) quando pertinentes, sem pretensão de equivalência regulatória.</li>
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg text-red-900">8. Limitações, Isenções e Responsabilidade</CardTitle>
+          </CardHeader>
+          <CardContent className="prose prose-sm sm:prose-base max-w-none p-4 sm:p-6 text-red-900">
+            <p>As recomendações da IA são sugestões baseadas em dados e literatura; a decisão clínica é exclusiva do profissional responsável. Não garantimos resultados clínicos; o uso indevido ou fora de contexto é de inteira responsabilidade do Usuário.</p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

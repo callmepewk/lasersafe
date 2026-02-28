@@ -37,6 +37,7 @@ import PageBlockManager from "../components/admin/PageBlockManager";
 import EquipmentAnalytics from "../components/admin/EquipmentAnalytics";
 import PrescriptionAnalytics from "../components/admin/PrescriptionAnalytics";
 import SpreadsheetFilterTool from "../components/admin/SpreadsheetFilterTool";
+import SEOAnalytics from "../components/admin/SEOAnalytics";
 import { systemUpdateEmail, customNotificationEmail, accountDeletedEmail } from "../components/utils/emailTemplates";
 
 export default function AdminControl() {
@@ -564,6 +565,7 @@ export default function AdminControl() {
     { id: 'equipment', name: 'Equipamentos', icon: Zap },
     { id: 'prescriptions', name: 'Receitas', icon: FileText },
     { id: 'files', name: 'Filtragem de Planilhas', icon: Filter },
+    { id: 'seo', name: 'SEO', icon: TrendingUp },
     { id: 'updates', name: 'Atualizações', icon: RefreshCw },
     { id: 'users', name: 'Usuários', icon: Users },
   ];
@@ -643,6 +645,7 @@ export default function AdminControl() {
 
       {/* FILTRAGEM DE PLANILHAS */}
       {activeSection === 'files' && <SpreadsheetFilterTool />}
+      {activeSection === 'seo' && <SEOAnalytics />}
 
       {/* GESTÃO DE ATUALIZAÇÕES */}
       {activeSection === 'updates' && (
