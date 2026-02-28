@@ -42,14 +42,15 @@ import UpdateListener from '@/components/system/UpdateListener';
 
 function LayoutContent({ children, currentPageName }) {
   const location = useLocation();
-  const sessionIdRef = React.useRef(() => {
-    const existing = sessionStorage.getItem('session_id');
-    if (existing) return existing;
-    const id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
-    sessionStorage.setItem('session_id', id);
-    return id;
-  })();
+  const sessionIdRef = React.useRef("");
   const pageTimerRef = React.useRef({ path: location.pathname, start: Date.now() });
+
+  React.useEffect(() => {
+    const existing = sessionStorage.getItem('session_id');
+    const id = existing ? existing : ((typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()));
+    if (!existing) sessionStorage.setItem('session_id', id);
+    sessionIdRef.current = id;
+  }, []);
   const [currentUser, setCurrentUser] = useState(null);
   const [showUpdatesModal, setShowUpdatesModal] = useState(false);
   const { t } = useTranslation();
@@ -156,7 +157,7 @@ function LayoutContent({ children, currentPageName }) {
           event_name,
           page: location.pathname,
           duration_ms: extra.duration_ms || 0,
-          session_id: sessionIdRef,
+          session_id: sessionIdRef.current,
           user_email: currentUser?.email || null,
         });
       } catch (e) { /* ignore */ }
@@ -168,7 +169,7 @@ function LayoutContent({ children, currentPageName }) {
         event_name: 'page_leave',
         page: pageTimerRef.current?.path || location.pathname,
         duration_ms: duration,
-        session_id: sessionIdRef,
+        session_id: sessionIdRef.current,
         user_email: currentUser?.email || null,
       });
     };
@@ -183,7 +184,7 @@ function LayoutContent({ children, currentPageName }) {
         event_name: 'page_stay',
         page: prev.path,
         duration_ms: duration,
-        session_id: sessionIdRef,
+        session_id: sessionIdRef.current,
         user_email: currentUser?.email || null,
       });
     }
@@ -192,7 +193,7 @@ function LayoutContent({ children, currentPageName }) {
       event_name: 'page_view',
       page: location.pathname,
       duration_ms: 0,
-      session_id: sessionIdRef,
+      session_id: sessionIdRef.current,
       user_email: currentUser?.email || null,
     });
   }, [location.pathname]);
