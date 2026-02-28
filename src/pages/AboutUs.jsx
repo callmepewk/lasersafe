@@ -26,7 +26,7 @@ export default function AboutUs() {
     },
     {
       name: "DermaHelp",
-      description: "Assistente inteligente para dúvidas rápidas e suporte dermatológico.",
+      description: "O aplicativo completo para profissionais cuidadores da pele, com análise de pele por IA, gestão de pacientes, agendamentos e relatórios detalhados.",
       url: "https://dermahelp.base44.app",
       icon: Sparkles,
       color: "from-indigo-500 to-indigo-600",
@@ -34,7 +34,7 @@ export default function AboutUs() {
     },
     {
       name: "Celeiro Digital",
-      description: "Plataforma de crescimento e presença digital para clínicas e profissionais.",
+      description: "Transformando vidas através da educação digital e tecnológica em Porto Firme.",
       url: "https://celeirodigital.base44.app",
       icon: TrendingUp,
       color: "from-amber-500 to-orange-600",

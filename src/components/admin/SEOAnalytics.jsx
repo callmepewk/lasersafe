@@ -2,8 +2,9 @@ import React from "react";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Clock, Users, Gauge } from "lucide-react";
+import { TrendingUp, Clock, Users, Gauge, DollarSign, FlaskConical, ListOrdered, Calendar } from "lucide-react";
 
 export default function SEOAnalytics() {
   const [loading, setLoading] = React.useState(true);
@@ -12,14 +13,20 @@ export default function SEOAnalytics() {
   const [perPage, setPerPage] = React.useState([]);
   const [uniqueSessions, setUniqueSessions] = React.useState(0);
   const [avgTimeSite, setAvgTimeSite] = React.useState(0);
+  const [roi, setRoi] = React.useState({ spend: 0, revenue: 0, roiPct: 0 });
+  const [topTech, setTopTech] = React.useState([]);
+  const [topProcedures, setTopProcedures] = React.useState([]);
+  const [avgAgg, setAvgAgg] = React.useState({ value: 0, label: '-' });
+  const [avgPerMonth, setAvgPerMonth] = React.useState(0);
 
   React.useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        const [evts, calcs] = await Promise.all([
+        const [evts, calcs, configs] = await Promise.all([
           base44.entities.AnalyticsEvent.list('-created_date'),
-          base44.entities.LaserCalculation.list('-created_date')
+          base44.entities.LaserCalculation.list('-created_date'),
+          base44.entities.AppConfig.list()
         ]);
 
         // Considerar janela de 30 dias
@@ -55,11 +62,73 @@ export default function SEOAnalytics() {
         const avg = sessionValues.length ? Math.round(sessionValues.reduce((a, b) => a + b, 0) / sessionValues.length) : 0;
         setAvgTimeSite(avg);
 
-        // Taxa de assertividade (IA): % de cálculos não ajustados manualmente
+        // Taxa de assertividade (IA) baseada na "confiança" da sugestão quando disponível
         const recentCalcs = calcs.filter(c => new Date(c.created_date).getTime() >= since);
         const total = recentCalcs.length;
-        const ok = recentCalcs.filter(c => !c.is_adjusted).length;
-        setAssertiveness({ total, ok, rate: total ? Math.round((ok / total) * 100) : 0 });
+        let confTotal = 0; let confOk = 0;
+        recentCalcs.forEach(c => {
+          const txt = (c.adjustment_reasoning || '').toLowerCase();
+          if (txt.includes('confian')) {
+            confTotal += 1;
+            if (txt.includes('alta')) confOk += 1;
+          }
+        });
+        const fallbackOk = recentCalcs.filter(c => !c.is_adjusted).length;
+        const usedOk = confTotal > 0 ? confOk : fallbackOk;
+        const usedTotal = confTotal > 0 ? confTotal : total;
+        setAssertiveness({ total: usedTotal, ok: usedOk, rate: usedTotal ? Math.round((usedOk / usedTotal) * 100) : 0 });
+
+        // ROI (30d): requer AppConfig com keys roi_marketing_spend e roi_avg_revenue_per_calc
+        let spend = 0, avgRev = 0;
+        if (Array.isArray(configs)) {
+          const getVal = (k) => {
+            const item = configs.find(c => c.key === k);
+            try { return item ? Number(JSON.parse(item.value)) : 0; } catch { return item ? Number(item.value) : 0; }
+          };
+          spend = getVal('roi_marketing_spend');
+          avgRev = getVal('roi_avg_revenue_per_calc');
+        }
+        const revenue = total * (avgRev || 0);
+        const roiPct = spend > 0 ? Math.round(((revenue - spend) / spend) * 100) : 0;
+        setRoi({ spend, revenue, roiPct });
+
+        // Top 10 tecnologias (lasers)
+        const techCount = {};
+        recentCalcs.forEach(c => {
+          const name = (c.laser_type === 'Outro' ? (c.other_laser_type || 'Outro') : (c.laser_type || 'Indefinido')).trim();
+          techCount[name] = (techCount[name] || 0) + 1;
+        });
+        const topTechArr = Object.entries(techCount).map(([name, count]) => ({ name, count }))
+          .sort((a,b) => b.count - a.count).slice(0, 10);
+        setTopTech(topTechArr);
+
+        // Procedimentos mais realizados
+        const procCount = {};
+        recentCalcs.forEach(c => {
+          const name = (c.procedure_type === 'Outro' ? (c.other_procedure_type || 'Outro') : (c.procedure_type || 'Indefinido')).trim();
+          procCount[name] = (procCount[name] || 0) + 1;
+        });
+        const topProcArr = Object.entries(procCount).map(([name, count]) => ({ name, count }))
+          .sort((a,b) => b.count - a.count).slice(0, 10);
+        setTopProcedures(topProcArr);
+
+        // Nível de agressividade médio
+        const mapAgg = { conservador: 1, moderado: 2, agressivo: 3 };
+        const values = recentCalcs.map(c => mapAgg[(c.aggressiveness_level || '').toLowerCase()]).filter(Boolean);
+        const avgVal = values.length ? (values.reduce((a,b)=>a+b,0)/values.length) : 0;
+        const label = avgVal === 0 ? '-' : (avgVal < 1.5 ? 'Conservador' : (avgVal < 2.5 ? 'Moderado' : 'Agressivo'));
+        setAvgAgg({ value: Math.round(avgVal*10)/10, label });
+
+        // Média de cálculos por mês (últimos 6 meses)
+        const since6m = Date.now() - 180 * 24 * 60 * 60 * 1000;
+        const calcs6m = calcs.filter(c => new Date(c.created_date).getTime() >= since6m);
+        const months = new Set();
+        calcs6m.forEach(c => {
+          const d = new Date(c.created_date);
+          months.add(`${d.getFullYear()}-${d.getMonth()+1}`);
+        });
+        const avgMonth = months.size ? Math.round(calcs6m.length / months.size) : calcs6m.length;
+        setAvgPerMonth(avgMonth);
       } finally {
         setLoading(false);
       }
@@ -122,7 +191,7 @@ export default function SEOAnalytics() {
 
       <Card className="bg-white/90 border-0 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Top páginas por tempo médio</CardTitle>
+          <CardTitle className="text-lg font-semibold">Top páginas por tempo médio (Geral)</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -144,6 +213,84 @@ export default function SEOAnalytics() {
           )}
         </CardContent>
       </Card>
+
+      {/* KPIs adicionais */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-4">
+        <Card className="bg-white/90 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-sm text-slate-600 flex items-center gap-2"><DollarSign className="w-4 h-4"/> ROI (30 dias)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{roi.roiPct}%</div>
+            <div className="text-xs text-slate-500 mt-1">Receita: R${'{'}(roi.revenue||0).toLocaleString('pt-BR'){'}'} • Gasto: R${'{'}(roi.spend||0).toLocaleString('pt-BR'){'}'}</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/90 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-sm text-slate-600 flex items-center gap-2"><Calendar className="w-4 h-4"/> Média de cálculos/mês (6m)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{avgPerMonth}</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white/90 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-sm text-slate-600 flex items-center gap-2"><TrendingUp className="w-4 h-4"/> Nível de agressividade médio</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{avgAgg.value || 0}</div>
+            <div className="text-xs text-slate-500 mt-1">{avgAgg.label}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Listas: Tecnologias e Procedimentos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mt-4">
+        <Card className="bg-white/90 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold flex items-center gap-2"><FlaskConical className="w-5 h-5"/> Top 10 Tecnologias (Lasers)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topTech.length === 0 ? (
+              <div className="text-slate-500">Sem dados suficientes.</div>
+            ) : (
+              <div className="space-y-2">
+                {topTech.map((t, i) => (
+                  <div key={t.name + i} className="flex items-center justify-between gap-4 p-2 rounded hover:bg-slate-50">
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="w-8 justify-center">{i+1}</Badge>
+                      <span className="text-slate-700">{t.name}</span>
+                    </div>
+                    <span className="font-semibold">{t.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        <Card className="bg-white/90 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold flex items-center gap-2"><ListOrdered className="w-5 h-5"/> Procedimentos mais realizados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topProcedures.length === 0 ? (
+              <div className="text-slate-500">Sem dados suficientes.</div>
+            ) : (
+              <div className="space-y-2">
+                {topProcedures.map((p, i) => (
+                  <div key={p.name + i} className="flex items-center justify-between gap-4 p-2 rounded hover:bg-slate-50">
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="w-8 justify-center">{i+1}</Badge>
+                      <span className="text-slate-700">{p.name}</span>
+                    </div>
+                    <span className="font-semibold">{p.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
