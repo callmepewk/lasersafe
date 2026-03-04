@@ -135,17 +135,56 @@ function LayoutContent({ children, currentPageName }) {
     }
   }, []);
 
-  // Rebrand: update document title and og:title
+  // Rebrand: update document title and key meta tags to LaserSafe
   React.useEffect(() => {
     try {
-      document.title = 'LaserSafe';
-      let og = document.querySelector('meta[property="og:title"]');
-      if (!og) {
-        og = document.createElement('meta');
-        og.setAttribute('property', 'og:title');
-        document.head.appendChild(og);
+      const APP_NAME = 'LaserSafe';
+      document.title = APP_NAME;
+
+      // og:title
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (!ogTitle) {
+        ogTitle = document.createElement('meta');
+        ogTitle.setAttribute('property', 'og:title');
+        document.head.appendChild(ogTitle);
       }
-      og.setAttribute('content', 'LaserSafe');
+      ogTitle.setAttribute('content', APP_NAME);
+
+      // og:site_name
+      let ogSiteName = document.querySelector('meta[property="og:site_name"]');
+      if (!ogSiteName) {
+        ogSiteName = document.createElement('meta');
+        ogSiteName.setAttribute('property', 'og:site_name');
+        document.head.appendChild(ogSiteName);
+      }
+      ogSiteName.setAttribute('content', APP_NAME);
+
+      // application-name
+      let appName = document.querySelector('meta[name="application-name"]');
+      if (!appName) {
+        appName = document.createElement('meta');
+        appName.setAttribute('name', 'application-name');
+        document.head.appendChild(appName);
+      }
+      appName.setAttribute('content', APP_NAME);
+
+      // apple-mobile-web-app-title
+      let appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if (!appleTitle) {
+        appleTitle = document.createElement('meta');
+        appleTitle.setAttribute('name', 'apple-mobile-web-app-title');
+        document.head.appendChild(appleTitle);
+      }
+      appleTitle.setAttribute('content', APP_NAME);
+
+      // twitter:title
+      let twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      if (!twitterTitle) {
+        twitterTitle = document.createElement('meta');
+        twitterTitle.setAttribute('name', 'twitter:title');
+        document.head.appendChild(twitterTitle);
+      }
+      twitterTitle.setAttribute('content', APP_NAME);
     } catch (e) { /* noop */ }
   }, []);
 
