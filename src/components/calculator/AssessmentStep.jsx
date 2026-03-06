@@ -187,7 +187,7 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
     assessment.target_type
   );
 
-  const isFractional = /fracionad|scanner|fraction/i.test(assessment.laser_type || '');
+  const isFractional = /fracionad|scanner|fraction|microlens/i.test(`${assessment.laser_type || ''} ${assessment.handpiece_type || ''}`);
 
   useEffect(() => { (async () => { try { const u = await base44.auth.me(); setCurrentUser(u); } catch(e){} })(); }, []);
 
