@@ -208,6 +208,9 @@ export default function History() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
   const [adminViewCleared, setAdminViewCleared] = useState(() => (localStorage.getItem('adminHistoryViewCleared') === '1'));
+  const [convertOpen, setConvertOpen] = useState(false);
+  const [convertCalc, setConvertCalc] = useState(null);
+  const [convertForm, setConvertForm] = useState({ name: '', cpf: '', phone: '', birth_date: '' });
 
   useEffect(() => {
     loadHistory();
@@ -277,6 +280,27 @@ export default function History() {
     } catch (error) {
       console.error("Erro ao limpar histórico:", error);
       alert("Falha ao limpar o histórico.");
+    }
+  };
+
+  const handleConvertSubmit = async () => {
+    if (!convertCalc) return;
+    try {
+      const newPatient = await Patient.create({
+        name: convertForm.name,
+        cpf: convertForm.cpf,
+        phone: convertForm.phone,
+        birth_date: convertForm.birth_date,
+      });
+      const tempId = convertCalc.patient_id;
+      const toUpdate = calculations.filter(c => c.patient_id === tempId);
+      await Promise.all(toUpdate.map(c => LaserCalculation.update(c.id, { patient_id: newPatient.id })));
+      setConvertOpen(false);
+      setConvertCalc(null);
+      await loadHistory();
+    } catch (e) {
+      console.error('Falha ao cadastrar paciente:', e);
+      alert('Falha ao cadastrar paciente.');
     }
   };
 
@@ -366,9 +390,16 @@ export default function History() {
                       </div>
                     </div>
                   </div>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="self-end sm:self-center flex-shrink-0 mt-2 sm:mt-0"><Eye className="w-4 h-4 mr-2" /> {tr.details}</Button>
-                  </DialogTrigger>
+                  <div className="flex items-center gap-2 self-end sm:self-center flex-shrink-0 mt-2 sm:mt-0">
+                    {(!patientsMap.get(calc.patient_id) && (calc.patient_id?.startsWith('temp_'))) && (
+                      <Button variant="secondary" onClick={() => { setConvertCalc(calc); setConvertForm({ name: '', cpf: '', phone: '', birth_date: '' }); setConvertOpen(true); }}>
+                        Cadastrar paciente
+                      </Button>
+                    )}
+                    <DialogTrigger asChild>
+                      <Button variant="outline"><Eye className="w-4 h-4 mr-2" /> {tr.details}</Button>
+                    </DialogTrigger>
+                  </div>
                 </CardContent>
               </Card>
               <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] flex flex-col print:p-8 print:max-w-none print:w-full print:h-auto print:rounded-none">
