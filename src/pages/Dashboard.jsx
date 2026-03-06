@@ -141,6 +141,11 @@ export default function Dashboard() {
         loading={isAcceptingTerms}
         onAccept={handleAcceptTerms}
       />
+
+      {/* Calculadora de Viabilidade (prioridade no mobile) */}
+      <div className="mb-6">
+        <LaserViabilityCalculator />
+      </div>
       {/* Promo Card - Calculadora Inteligente */}
       <div className="sticky top-0 z-30 mb-4">
         <div className="rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white shadow-xl ring-1 ring-black/5 flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -196,7 +201,8 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+      <!-- moved to bottom after Ações Rápidas per mobile order -->
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8 hidden"
         <StatCard
           title={t("dashboard.registeredPatients", "Pacientes Cadastrados")}
           value={stats.patients}
@@ -310,15 +316,37 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Estatísticas (reposicionado para baixo no mobile) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+        <StatCard
+          title={t("dashboard.registeredPatients", "Pacientes Cadastrados")}
+          value={stats.patients}
+          icon={Users}
+          color="text-blue-500"
+          link={createPageUrl("Patients")}
+        />
+        <StatCard
+          title={t("dashboard.registeredProfessionals", "Profissionais Cadastrados")}
+          value={stats.professionals}
+          icon={UserCheck}
+          color="text-green-500"
+          link={createPageUrl("Professionals")}
+        />
+        <StatCard
+          title={t("dashboard.totalProcedures", "Total de Procedimentos")}
+          value={stats.calculations}
+          icon={Calculator}
+          color="text-purple-500"
+          link={createPageUrl("History")}
+        />
+      </div>
+
       {/* Banner Display */}
       <div className="mb-6">
         <BannerDisplay />
       </div>
 
-      {/* CALCULADORA DE VIABILIDADE DE LASER */}
-      <div className="mb-6">
-        <LaserViabilityCalculator />
-      </div>
+
     </div>
     </PageBlockChecker>
   );

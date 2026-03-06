@@ -1535,15 +1535,17 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                           placeholder="15"
                         />
                       </div>
-                      <div className="pt-4">
-                        <Button 
-                          className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg h-12"
-                          onClick={calculateViability}
-                          disabled={!canCalculate}
-                        >
-                          <Calculator className="w-5 h-5 mr-2" />
-                          Calcular Viabilidade (Etapa Final)
-                        </Button>
+                      <div className="pt-4 md:pt-0">
+                        <div className="md:static fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-sm px-4 py-3 md:px-0 md:py-0 border-t md:border-0">
+                          <Button 
+                            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg h-12"
+                            onClick={calculateViability}
+                            disabled={!canCalculate}
+                          >
+                            <Calculator className="w-5 h-5 mr-2" />
+                            Calcular Viabilidade (Etapa Final)
+                          </Button>
+                        </div>
                       </div>
                     </TabsContent>
                   </Tabs>

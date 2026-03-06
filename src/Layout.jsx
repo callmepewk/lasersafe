@@ -349,7 +349,7 @@ function LayoutContent({ children, currentPageName }) {
             <div className="hidden md:block fixed top-4 right-4 z-50 print:hidden">
               <LanguageSelector variant="outline" />
             </div>
-            <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 px-4 py-3 md:hidden print:hidden">
+            <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200/60 px-4 py-3 md:hidden print:hidden sticky top-0 z-50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                    <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
