@@ -187,7 +187,7 @@ Ordene por relevância para a busca.`,
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       {/* Seleção de Paciente e Profissional */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
@@ -280,7 +280,7 @@ Ordene por relevância para a busca.`,
               placeholder="Digite nome do produto, princípio ativo ou indicação (ex: cicatrizante, paracetamol, ácido hialurônico)..."
               value={medicationSearch}
               onChange={(e) => setMedicationSearch(e.target.value)}
-              className="pl-10 h-11 text-base"
+              className="pl-10 h-10 text-base"
             />
             {searchingMedication && (
               <Loader2 className="absolute right-3 top-3 w-5 h-5 text-emerald-600 animate-spin" />
