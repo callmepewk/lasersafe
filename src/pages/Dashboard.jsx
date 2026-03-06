@@ -293,7 +293,7 @@ export default function Dashboard() {
       </div>
 
       {/* Estatísticas (reposicionado para baixo no mobile) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8" id="dashboard-metrics">
         <StatCard
           title={t("dashboard.registeredPatients", "Pacientes Cadastrados")}
           value={stats.patients}
