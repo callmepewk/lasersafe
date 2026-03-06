@@ -239,7 +239,14 @@ Responda em JSON.`;
             spot_size: { type: 'string' },
             frequency: { type: 'string' },
             cooling_intensity: { type: 'string' },
-            rationale: { type: 'string' }
+            rationale: { type: 'string' },
+            // Avançados para fracionado/scanner (quando presentes)
+            densidade_microspots: { type: 'number' },
+            spacing_mm: { type: 'number' },
+            numero_passes: { type: 'number' },
+            energia_por_microspot_mj: { type: 'number' },
+            profundidade_estimada_mm: { type: 'number' },
+            cobertura_percentual: { type: 'number' }
           }
         }
       });
@@ -732,6 +739,29 @@ Responda em JSON.`;
                 <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Spot</p><p className="font-bold">{aiSuggestions.spot_size}</p></div>
                 <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Frequência</p><p className="font-bold">{aiSuggestions.frequency}</p></div>
                 <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Resfriamento</p><p className="font-bold">{aiSuggestions.cooling_intensity}</p></div>
+              </div>
+            )}
+            {/* Extras avançados quando fracionado/scanner */}
+            {isFractional && (aiSuggestions?.densidade_microspots || aiSuggestions?.spacing_mm || aiSuggestions?.numero_passes || aiSuggestions?.energia_por_microspot_mj || aiSuggestions?.profundidade_estimada_mm || aiSuggestions?.cobertura_percentual) && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                {aiSuggestions?.densidade_microspots !== undefined && (
+                  <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Densidade</p><p className="font-bold">{aiSuggestions.densidade_microspots}</p></div>
+                )}
+                {aiSuggestions?.spacing_mm !== undefined && (
+                  <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Spacing (mm)</p><p className="font-bold">{aiSuggestions.spacing_mm}</p></div>
+                )}
+                {aiSuggestions?.numero_passes !== undefined && (
+                  <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Passes</p><p className="font-bold">{aiSuggestions.numero_passes}</p></div>
+                )}
+                {aiSuggestions?.energia_por_microspot_mj !== undefined && (
+                  <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Energia/spot (mJ)</p><p className="font-bold">{aiSuggestions.energia_por_microspot_mj}</p></div>
+                )}
+                {aiSuggestions?.profundidade_estimada_mm !== undefined && (
+                  <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Profundidade (mm)</p><p className="font-bold">{aiSuggestions.profundidade_estimada_mm}</p></div>
+                )}
+                {aiSuggestions?.cobertura_percentual !== undefined && (
+                  <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Cobertura (%)</p><p className="font-bold">{aiSuggestions.cobertura_percentual}%</p></div>
+                )}
               </div>
             )}
             {aiSuggestions?.rationale && (
