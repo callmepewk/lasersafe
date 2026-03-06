@@ -1176,6 +1176,18 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
   // Sugestões combinadas: Tecnologias expostas + todos os modelos do banco (prioriza nacionais)
   const brazilianManufacturers = ["Ibramed","HTM","KLD","MMOptics","DGM","Tone Derm"];
   const techOptions = laserTechOptions.map(t => ({ value: t.value, label: `${t.label} [Tecnologia]` }));
+  // Simplificar rótulos de tecnologias (sem números/comprimentos de onda)
+  const simplifyLabel = (s) => (s || "")
+    .replace(/\(.*?\)/g, "")       // remove parênteses e conteúdo
+    .replace(/\d+([.,]\d+)?\s*nm/gi, "") // remove padrões 'xxxxnm'
+    .replace(/\d+(-\d+)?\s*nm/gi, "")    // remove faixas 'xxx-xxxxnm'
+    .replace(/\d+(-\d+)?/g, "")     // remove números isolados ou faixas
+    .replace(/\s{2,}/g, " ")        // normaliza espaços
+    .trim();
+  const simplifiedTechOptions = Array.from(new Set(laserTechOptions.map(o => simplifyLabel(o.label))))
+    .filter(Boolean)
+    .sort((a,b) => a.localeCompare(b, 'pt-BR'))
+    .map(name => ({ value: name, label: name }));
   const modelOptions = laserDatabase.map(d => ({ value: d.name, label: `${d.name} (${d.manufacturer})`, m: d.manufacturer || "" })); // legacy suggester (mantido)
   const modelOptionsSorted = modelOptions.sort((a,b) => {
     const pa = brazilianManufacturers.some(m => a.m?.toLowerCase().includes(m.toLowerCase())) ? 0 : 1;
@@ -1256,7 +1268,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                       <div>
                         <Label htmlFor="laserType">Tecnologia do Laser</Label>
                         <Combobox
-                          options={laserTypes.map(t => ({ value: t.id, label: t.name }))}
+                          options={simplifiedTechOptions}
                           value={selectedLaserTypeId}
                           onChange={(val) => setSelectedLaserTypeId(val)}
                           placeholder="Selecione a tecnologia"
