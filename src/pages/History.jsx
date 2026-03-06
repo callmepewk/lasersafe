@@ -437,6 +437,38 @@ export default function History() {
         )}
       </div>
     </div>
+
+    {/* Modal de conversão para paciente cadastrado */}
+    <Dialog open={convertOpen} onOpenChange={setConvertOpen}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Cadastrar paciente</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="name">Nome</Label>
+            <Input id="name" value={convertForm.name} onChange={(e) => setConvertForm({ ...convertForm, name: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="cpf">CPF</Label>
+            <Input id="cpf" value={convertForm.cpf} onChange={(e) => setConvertForm({ ...convertForm, cpf: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="phone">Telefone</Label>
+            <Input id="phone" value={convertForm.phone} onChange={(e) => setConvertForm({ ...convertForm, phone: e.target.value })} />
+          </div>
+          <div>
+            <Label htmlFor="birth_date">Data de Nascimento</Label>
+            <Input id="birth_date" type="date" value={convertForm.birth_date} onChange={(e) => setConvertForm({ ...convertForm, birth_date: e.target.value })} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setConvertOpen(false)}>Cancelar</Button>
+          <Button onClick={handleConvertSubmit}>Salvar e vincular</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
     </PageBlockChecker>
   );
 }
