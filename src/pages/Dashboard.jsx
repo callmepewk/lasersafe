@@ -322,6 +322,10 @@ export default function Dashboard() {
         <BannerDisplay />
       </div>
 
+      {/* Calculadora de Viabilidade colocada abaixo das métricas */}
+      <div className="mb-10" id="laser-viability-after-metrics">
+        <LaserViabilityCalculator />
+      </div>
 
     </div>
     </PageBlockChecker>
