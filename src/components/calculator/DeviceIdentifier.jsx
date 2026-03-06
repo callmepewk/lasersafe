@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Upload, Camera, X, Loader2, CheckCircle } from "lucide-react";
+import { Upload, Camera, X, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { laserDatabase } from "./laserDatabase";
 
@@ -19,6 +19,7 @@ export default function DeviceIdentifier({ deviceInfo, onDeviceInfoChange }) {
   const [search, setSearch] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
+  const [hasSearched, setHasSearched] = useState(false);
 
   const brandOptions = React.useMemo(() => {
     const arr = Array.from(new Set(laserDatabase.map(l => l.manufacturer).filter(Boolean)));
@@ -29,6 +30,19 @@ export default function DeviceIdentifier({ deviceInfo, onDeviceInfoChange }) {
     const arr = Array.from(new Set(laserDatabase.map(l => l.type).filter(Boolean)));
     return ["all", ...arr.sort()];
   }, []);
+
+  const filteredList = React.useMemo(() => {
+    const s = (search || "").toLowerCase().trim();
+    return laserDatabase.filter((l) => {
+      const matchesSearch = !s ||
+        (l.name?.toLowerCase() || "").includes(s) ||
+        (l.manufacturer?.toLowerCase() || "").includes(s) ||
+        (l.type?.toLowerCase() || "").includes(s);
+      const matchesBrand = selectedBrand === "all" || (l.manufacturer || "") === selectedBrand;
+      const matchesType = selectedType === "all" || (l.type || "") === selectedType;
+      return matchesSearch && matchesBrand && matchesType;
+    });
+  }, [search, selectedBrand, selectedType]);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -205,16 +219,16 @@ Retorne apenas o JSON.`,
         <div className="mb-4">
           <Dialog open={openCatalog} onOpenChange={setOpenCatalog}>
             <DialogTrigger asChild>
-              <Button type="button" variant="outline">Selecionar laser no catálogo</Button>
+              <Button type="button" variant="outline" onClick={() => setHasSearched(false)}>Selecionar laser no catálogo</Button>
             </DialogTrigger>
-            <DialogContent className="w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[75vh] overflow-hidden">
+            <DialogContent className="w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[75vh] overflow-hidden" onOpenAutoFocus={(e) => { e.preventDefault(); setHasSearched(false); }}>
               <DialogHeader>
                 <DialogTitle>Selecionar Laser</DialogTitle>
               </DialogHeader>
               <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <Input placeholder="Buscar por nome, fabricante, tipo..." value={search} onChange={(e) => setSearch(e.target.value)} />
-                  <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2" role="search">
+                  <Input placeholder="Buscar por nome, fabricante, tipo..." value={search} onChange={(e) => { setSearch(e.target.value); setHasSearched(true); }} />
+                  <Select value={selectedBrand} onValueChange={(value) => { setSelectedBrand(value); setHasSearched(true); }}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Marca" />
                     </SelectTrigger>
@@ -224,7 +238,7 @@ Retorne apenas o JSON.`,
                       ))}
                     </SelectContent>
                   </Select>
-                  <Select value={selectedType} onValueChange={setSelectedType}>
+                  <Select value={selectedType} onValueChange={(value) => { setSelectedType(value); setHasSearched(true); }}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Tecnologia" />
                     </SelectTrigger>
@@ -236,18 +250,8 @@ Retorne apenas o JSON.`,
                   </Select>
                 </div>
                 <div className="border rounded-md h-[55vh] overflow-y-auto p-2 bg-white/60">
-                  {laserDatabase
-                    .filter((l) => {
-                      const s = search.toLowerCase();
-                      const matchesSearch =
-                        (l.name?.toLowerCase() || "").includes(s) ||
-                        (l.manufacturer?.toLowerCase() || "").includes(s) ||
-                        (l.type?.toLowerCase() || "").includes(s);
-                      const matchesBrand = selectedBrand === "all" || (l.manufacturer || "") === selectedBrand;
-                      const matchesType = selectedType === "all" || (l.type || "") === selectedType;
-                      return matchesSearch && matchesBrand && matchesType;
-                    })
-                    .map((l, idx) => (
+                  {filteredList.length > 0 ? (
+                    filteredList.map((l, idx) => (
                       <button key={idx} className="w-full text-left p-3 rounded hover:bg-slate-100 border-b last:border-b-0"
                         onClick={() => {
                           onDeviceInfoChange({ brand: l.manufacturer, model: l.name, type: l.type, wavelength: l.wavelength, description: `${l.type} - ${l.wavelength}` });
@@ -256,7 +260,17 @@ Retorne apenas o JSON.`,
                         <p className="font-medium text-slate-900">{l.name}</p>
                         <p className="text-xs text-slate-600">{l.manufacturer} • {l.wavelength} • {l.type}</p>
                       </button>
-                    ))}
+                    ))
+                  ) : (
+                    hasSearched ? (
+                      <div className="flex items-start gap-2 p-3 bg-amber-50 text-amber-800 rounded-md border border-amber-200">
+                        <AlertCircle className="w-4 h-4 mt-0.5 text-amber-700" />
+                        <p className="text-sm">
+                          Nenhum equipamento localizado na base de dados atual. A busca é baseada em registros nacionais autorizados pela ANVISA e SBD, incluindo referências internacionais.
+                        </p>
+                      </div>
+                    ) : null
+                  )
                 </div>
               </div>
             </DialogContent>
