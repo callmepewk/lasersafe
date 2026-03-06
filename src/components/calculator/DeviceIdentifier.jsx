@@ -141,7 +141,7 @@ Retorne apenas o JSON.`,
         </div>
         
         <p className="text-sm text-slate-600 mb-4">
-          Faça upload da foto do aparelho para identificação automática com IA ou preencha manualmente
+          Faça upload da foto do aparelho (opcional) e preencha os dados manualmente ou selecione no catálogo
         </p>
 
         {/* Upload de Foto */}
