@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { UserCheck, Search, ArrowLeft, User as UserIcon } from "lucide-react";
 import { useTranslation } from "@/components/i18n/TranslationContext";
 
@@ -54,6 +55,32 @@ export default function ProfessionalSelectionStep({ selectedProfessional, onProf
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
+        <div className="mb-4 p-3 rounded-md bg-amber-50 border border-amber-200 text-sm text-amber-900">
+          A seleção do profissional é necessária para verificação da habilitação legal para utilização de lasers e tecnologias dermatológicas.
+        </div>
+        <div className="mb-4">
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="text-blue-700 hover:underline text-sm">Veja quem pode realizar esses procedimentos.</button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Profissionais habilitados (Brasil)</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-2 text-sm text-slate-700">
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Médicos (conforme especialidade/atribuições)</li>
+                  <li>Dermatologistas</li>
+                  <li>Biomédicos estetas (habilitados)</li>
+                  <li>Fisioterapeutas dermatofuncionais</li>
+                  <li>Enfermeiros estetas (habilitados)</li>
+                  <li>Dentistas habilitados em estética</li>
+                </ul>
+                <p className="text-xs text-slate-500 mt-2">Consulte sempre as normativas dos respectivos conselhos profissionais e regulamentações locais vigentes.</p>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
