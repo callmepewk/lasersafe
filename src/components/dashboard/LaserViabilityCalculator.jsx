@@ -735,6 +735,16 @@ export default function LaserViabilityCalculator() {
   // Trigger verification when model/manufacturer changes
   useEffect(() => { verifyEquipment(formData.deviceModel, selectedManufacturerId); }, [formData.deviceModel, selectedManufacturerId]); // uses join table when available
 
+  // Reset fabricante/modelo quando a tecnologia muda (filtra fabricantes por tecnologia)
+  useEffect(() => {
+    const allowedSet = selectedLaserTypeId ? new Set((equipmentIndex.byTech[selectedLaserTypeId] || []).map(it => it.manufacturerId)) : null;
+    if (allowedSet && selectedManufacturerId && !allowedSet.has(selectedManufacturerId)) {
+      setSelectedManufacturerId("");
+      handleInputChange("deviceBrand", "");
+      handleInputChange("deviceModel", "");
+    }
+  }, [selectedLaserTypeId, equipmentIndex.byTech]);
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -1184,6 +1194,9 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
     { key: 'revenue', label: 'Receita' },
   ];
   const canCalculate = verifyStatus?.found && categoryConfirmed; // requires multi-tech verification as above
+const filteredManufacturers = selectedLaserTypeId
+  ? manufacturers.filter(m => (equipmentIndex.byTech[selectedLaserTypeId] || []).some(it => it.manufacturerId === m.id))
+  : manufacturers;
 
   return (
     <>
@@ -1259,7 +1272,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                         <div className="mt-3">
                           <Label htmlFor="manufacturer">Fabricante</Label>
                           <Combobox
-                            options={manufacturers.map(m => ({ value: m.id, label: m.name }))}
+                            options={filteredManufacturers.map(m => ({ value: m.id, label: m.name }))}
                             value={selectedManufacturerId}
                             onChange={(val) => {
                               setSelectedManufacturerId(val);
