@@ -70,6 +70,11 @@ export default function LaserViabilityCalculator() {
   const [categoryConfirmed, setCategoryConfirmed] = useState(false);
   const cacheRef = useRef(new Map());
   const [deviceInfo, setDeviceInfo] = useState({});
+  const [manufacturers, setManufacturers] = useState([]);
+  const [laserTypes, setLaserTypes] = useState([]);
+  const [equipmentIndex, setEquipmentIndex] = useState({ byManufacturer: {}, byTech: {} });
+  const [selectedLaserTypeId, setSelectedLaserTypeId] = useState("");
+  const [selectedManufacturerId, setSelectedManufacturerId] = useState("");
   const handleDeviceInfoChange = (info) => {
     setDeviceInfo(info);
     if (info.model) handleInputChange("deviceModel", info.model);
@@ -171,9 +176,185 @@ export default function LaserViabilityCalculator() {
     }
   };
 
-  useEffect(() => { ensureSeeded(); }, []);
+  useEffect(() => { ensureSeeded(); ensureRegulatorySeeded(); }, []);
+
+  const ensureRegulatorySeeded = async () => {
+    try {
+      // Manufacturers
+      let mans = await base44.entities.Manufacturer.list();
+      if (!Array.isArray(mans) || mans.length === 0) {
+        const intl = [
+          "Candela","Cynosure","Lumenis","Alma Lasers","Fotona","Cutera","Lutronic","Sciton","Quanta System","Asclepion Laser Technologies","DEKA","Solta Medical","Lynton Lasers","Energist Medical","El.En Group","Sharplight","BTL Aesthetics","InMode","Venus Concept","Aerolase","Syneron","EndyMed","Vydence Medical","Wontech","Jeisys Medical","Hironic","Union Medical","Eunsung Global","Ilooda","MedArt","Lasering USA","Bison Medical","GME German Medical Engineering","ARC Laser","Biolitec","Hyper Photonics","Gigaa Laser","Raycome","Sincoheren","Honkon","ADSS"
+        ];
+        const br = [
+          "Industra Technologies","MMOptics","Ibramed","HTM Eletrônica","Tonederm","KLD Biosistemas","Advice Equipamentos","MedSystems","Vydence Brasil","BioLambda"
+        ];
+        await base44.entities.Manufacturer.bulkCreate([
+          ...intl.map(n => ({ name: n, country: "Internacional", verified_sbd: false, verified_anvisa: false })),
+          ...br.map(n => ({ name: n, country: "Brasil", verified_sbd: true, verified_anvisa: false }))
+        ]);
+        mans = await base44.entities.Manufacturer.list();
+      }
+      const manByName = Object.fromEntries(mans.map(m => [m.name, m]));
+
+      // Laser types
+      let types = await base44.entities.LaserType.list();
+      if (!Array.isArray(types) || types.length === 0) {
+        const typeNames = [
+          "CO2 Fracionado","Er:YAG","Nd:YAG 1064nm","Nd:YAG Q-Switched","Alexandrite 755nm","Diodo 800–810nm","Diodo 940nm","Diodo 980nm","Pulsed Dye Laser (PDL)","Ruby Laser","Picolaser","IPL (Luz Intensa Pulsada)","Laser vascular","Laser para pigmento","Laser para resurfacing","Laser para depilação","Laser fracionado não ablativo"
+        ];
+        await base44.entities.LaserType.bulkCreate(typeNames.map(n => ({ name: n, wavelength: n.includes("nm") ? n.match(/\d+\s*nm/i)?.[0] || "" : "", applications: [] })));
+        types = await base44.entities.LaserType.list();
+      }
+      const typeByName = Object.fromEntries(types.map(t => [t.name, t]));
+
+      // Equipments
+      let eqs = await base44.entities.Equipment.list();
+      if (!Array.isArray(eqs) || eqs.length === 0) {
+        const seed = [
+          { m: "Candela", model: "GentleMax Pro", t: "Alexandrite 755nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Candela", model: "GentleLase Pro", t: "Alexandrite 755nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Candela", model: "GentleYAG Pro", t: "Nd:YAG 1064nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Candela", model: "VBeam Perfecta", t: "Pulsed Dye Laser (PDL)", reg: "", status: "regular", risk: "baixo" },
+
+          { m: "Cynosure", model: "Elite+", t: "Alexandrite 755nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Cynosure", model: "Apogee Elite", t: "Alexandrite 755nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Cynosure", model: "PicoSure", t: "Picolaser", reg: "", status: "regular", risk: "baixo" },
+          { m: "Cynosure", model: "Icon", t: "IPL (Luz Intensa Pulsada)", reg: "", status: "regular", risk: "medio" },
+
+          { m: "Lumenis", model: "M22", t: "IPL (Luz Intensa Pulsada)", reg: "", status: "regular", risk: "medio" },
+          { m: "Lumenis", model: "LightSheer Desire", t: "Diodo 800–810nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Lumenis", model: "UltraPulse", t: "CO2 Fracionado", reg: "", status: "regular", risk: "baixo" },
+          { m: "Lumenis", model: "AcuPulse", t: "CO2 Fracionado", reg: "", status: "regular", risk: "baixo" },
+
+          { m: "Alma Lasers", model: "Soprano ICE", t: "Diodo 800–810nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Alma Lasers", model: "Soprano Titanium", t: "Diodo 800–810nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Alma Lasers", model: "Harmony XL Pro", t: "IPL (Luz Intensa Pulsada)", reg: "", status: "regular", risk: "medio" },
+          { m: "Alma Lasers", model: "Accent Prime", t: "Laser para resurfacing", reg: "", status: "regular", risk: "medio" },
+
+          { m: "Fotona", model: "SP Dynamis", t: "Er:YAG", reg: "", status: "regular", risk: "baixo" },
+          { m: "Fotona", model: "StarWalker", t: "Picolaser", reg: "", status: "regular", risk: "baixo" },
+          { m: "Fotona", model: "TimeWalker", t: "Er:YAG", reg: "", status: "regular", risk: "baixo" },
+
+          { m: "Cutera", model: "Excel V", t: "Laser vascular", reg: "", status: "regular", risk: "baixo" },
+          { m: "Cutera", model: "Xeo", t: "IPL (Luz Intensa Pulsada)", reg: "", status: "regular", risk: "medio" },
+          { m: "Cutera", model: "Secret RF", t: "Laser para resurfacing", reg: "", status: "regular", risk: "medio" },
+
+          { m: "Lutronic", model: "Clarity II", t: "Alexandrite 755nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Lutronic", model: "Spectra XT", t: "Nd:YAG 1064nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Lutronic", model: "Ultraformer III", t: "Laser para resurfacing", reg: "", status: "regular", risk: "medio" },
+
+          { m: "Sciton", model: "Joule", t: "Laser para resurfacing", reg: "", status: "regular", risk: "medio" },
+          { m: "Sciton", model: "BBL Hero", t: "IPL (Luz Intensa Pulsada)", reg: "", status: "regular", risk: "medio" },
+          { m: "Sciton", model: "Halo", t: "Laser fracionado não ablativo", reg: "", status: "regular", risk: "baixo" },
+
+          { m: "Quanta System", model: "Discovery Pico", t: "Picolaser", reg: "", status: "regular", risk: "baixo" },
+          { m: "Quanta System", model: "Thunder MT", t: "Alexandrite 755nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Quanta System", model: "Duetto MT", t: "Alexandrite 755nm", reg: "", status: "regular", risk: "baixo" },
+
+          { m: "Asclepion Laser Technologies", model: "MeDioStar", t: "Diodo 800–810nm", reg: "", status: "regular", risk: "baixo" },
+          { m: "Asclepion Laser Technologies", model: "Dermablate", t: "Er:YAG", reg: "", status: "regular", risk: "baixo" },
+
+          { m: "DEKA", model: "SmartXide DOT", t: "CO2 Fracionado", reg: "", status: "regular", risk: "baixo" },
+          { m: "DEKA", model: "Motus AX", t: "Alexandrite 755nm", reg: "", status: "regular", risk: "baixo" },
+
+          { m: "Solta Medical", model: "Fraxel Dual", t: "Laser fracionado não ablativo", reg: "", status: "regular", risk: "baixo" },
+          { m: "Solta Medical", model: "Thermage FLX", t: "Laser para resurfacing", reg: "", status: "regular", risk: "medio" },
+
+          { m: "Industra Technologies", model: "Etherea MX", t: "Laser fracionado não ablativo", reg: "", status: "regular", risk: "baixo" },
+          { m: "Industra Technologies", model: "Etherea Smart", t: "Laser para resurfacing", reg: "", status: "regular", risk: "medio" },
+
+          { m: "Lutronic", model: "Spectra G2", t: "Nd:YAG 1064nm", reg: "", status: "regular", risk: "baixo" },
+
+          { m: "MMOptics", model: "Recover", t: "Laser para pigmento", reg: "", status: "regular", risk: "medio" },
+          { m: "MMOptics", model: "SmartLaser", t: "Laser para pigmento", reg: "", status: "regular", risk: "medio" },
+
+          { m: "Ibramed", model: "Polarys", t: "Laser para resurfacing", reg: "", status: "regular", risk: "medio" },
+          { m: "Ibramed", model: "Hakon", t: "Laser para resurfacing", reg: "", status: "regular", risk: "medio" },
+
+          { m: "HTM Eletrônica", model: "HTM LaserPulse", t: "Diodo 800–810nm", reg: "", status: "regular", risk: "medio" },
+
+          { m: "Tonederm", model: "Spectra VRM", t: "Nd:YAG Q-Switched", reg: "", status: "regular", risk: "medio" }
+        ];
+
+        const toCreate = seed.map(s => ({
+          manufacturer_id: manByName[s.m]?.id || "",
+          model: s.model,
+          laser_type_id: typeByName[s.t]?.id || "",
+          registro_anvisa: s.reg,
+          status_regulatorio: s.status,
+          risco_regulatorio: s.risk
+        })).filter(e => e.manufacturer_id && e.model);
+        if (toCreate.length) {
+          await base44.entities.Equipment.bulkCreate(toCreate);
+        }
+        eqs = await base44.entities.Equipment.list();
+      }
+
+      // Build indexes
+      const byManufacturer = {};
+      const byTech = {};
+      eqs.forEach(e => {
+        if (!byManufacturer[e.manufacturer_id]) byManufacturer[e.manufacturer_id] = [];
+        byManufacturer[e.manufacturer_id].push({ model: e.model, typeId: e.laser_type_id, registro: e.registro_anvisa, risk: e.risco_regulatorio });
+        if (e.laser_type_id) {
+          if (!byTech[e.laser_type_id]) byTech[e.laser_type_id] = [];
+          byTech[e.laser_type_id].push({ model: e.model, manufacturerId: e.manufacturer_id });
+        }
+      });
+
+      setManufacturers(mans);
+      setLaserTypes(types);
+      setEquipmentIndex({ byManufacturer, byTech });
+    } catch (e) {
+      // ignore
+    }
+  };
 
   const normalize = (s) => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+  const verifyEquipment = async (model, manufacturerId) => {
+    if (!model || !manufacturerId) { setVerifyStatus(null); setCategoryConfirmed(false); return; }
+    const key = `${manufacturerId}__${model}`;
+    if (cacheRef.current.has(key)) {
+      setVerifyStatus(cacheRef.current.get(key));
+      setCategoryConfirmed(false);
+      return;
+    }
+    setVerifyLoading(true);
+    try {
+      let recs = await base44.entities.Equipment.filter({ manufacturer_id: manufacturerId, model });
+      let record = Array.isArray(recs) && recs[0] ? recs[0] : null;
+      if (!record) {
+        const allM = await base44.entities.Equipment.filter({ manufacturer_id: manufacturerId });
+        const nModel = normalize(model);
+        record = allM.find(e => normalize(e.model) === nModel || normalize(e.model).includes(nModel));
+      }
+      if (record) {
+        const status = {
+          found: true,
+          manufacturer: manufacturers.find(m => m.id === manufacturerId)?.name || "",
+          model: record.model,
+          technology: laserTypes.find(t => t.id === record.laser_type_id)?.name || "",
+          registration: record.registro_anvisa || "",
+          regulatory_status: record.status_regulatorio || "",
+          risk: record.risco_regulatorio || "medio",
+        };
+        cacheRef.current.set(key, status);
+        setVerifyStatus(status);
+        setCategoryConfirmed(false);
+      } else {
+        const status = { found: false };
+        cacheRef.current.set(key, status);
+        setVerifyStatus(status);
+        setCategoryConfirmed(false);
+      }
+    } catch (e) {
+      setVerifyStatus({ found: false });
+      setCategoryConfirmed(false);
+    }
+    setVerifyLoading(false);
+  };
 
   const verifyDevice = async (model, brand) => {
     if (!model) { setVerifyStatus(null); setCategoryConfirmed(false); return; }
@@ -225,8 +406,8 @@ export default function LaserViabilityCalculator() {
     setVerifyLoading(false);
   };
 
-  // Trigger verification when model/brand changes
-  useEffect(() => { verifyDevice(formData.deviceModel, formData.deviceBrand); }, [formData.deviceModel, formData.deviceBrand]);
+  // Trigger verification when model/manufacturer changes
+  useEffect(() => { verifyEquipment(formData.deviceModel, selectedManufacturerId); }, [formData.deviceModel, selectedManufacturerId]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -408,7 +589,25 @@ export default function LaserViabilityCalculator() {
           </div>
         </div>
 
-        <div class="highlight-box">
+        ${verifyStatus?.found ? `
+        <div class="section">
+          <h2>🛡️ Verificação Reguladora</h2>
+          <div class="info-grid">
+            <div class="info-item"><div class="info-label">Fabricante</div><div class="info-value">${verifyStatus.manufacturer || ''}</div></div>
+            <div class="info-item"><div class="info-label">Modelo</div><div class="info-value">${verifyStatus.model || ''}</div></div>
+            <div class="info-item"><div class="info-label">Tecnologia</div><div class="info-value">${verifyStatus.technology || ''}</div></div>
+            <div class="info-item"><div class="info-label">Registro ANVISA</div><div class="info-value">${verifyStatus.registration || '—'}</div></div>
+          </div>
+          <p style="margin-top:10px;color:#16a34a;font-weight:600">Equipamento verificado pela base LaserSafe • Compatibilidade regulatória consultada</p>
+          <p style="margin-top:6px;color:#64748b;font-size:12px">A verificação é feita por consulta direta à base estruturada (sem IA).</p>
+        </div>` : `
+        <div class="section">
+          <h2>⚠️ Verificação Reguladora</h2>
+          <p>Status: Equipamento não localizado na base regulatória. Verifique o registro ANVISA do equipamento.</p>
+          <p style="margin-top:6px;color:#64748b;font-size:12px">A verificação é feita por consulta direta à base estruturada (sem IA).</p>
+        </div>`}
+
+         <div class="highlight-box">
           <div class="label">⏱️ RETORNO DO INVESTIMENTO (ROI)</div>
           <div class="big-number">${results.roiMonths.toFixed(1)} meses</div>
           <div class="viability-badge viability-${results.viabilityRating}">
@@ -722,21 +921,44 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                     {/* TAB: INVESTIMENTO */}
                     <TabsContent value="investment" className="space-y-4">
                       <div>
-                        <Label htmlFor="deviceModel">Modelo do Laser</Label>
+                        <Label htmlFor="laserType">Tecnologia do Laser</Label>
                         <Combobox
-                          options={combinedOptions}
-                          value={formData.deviceModel}
-                          onChange={(val) => {
-                            const selected = laserDatabase.find(d => d.name === val);
-                            handleInputChange("deviceModel", val);
-                            if (selected?.manufacturer) {
-                              handleInputChange("deviceBrand", selected.manufacturer);
-                            }
-                          }}
-                          placeholder="Pesquise e selecione o modelo..."
-                          emptyText="Nenhum modelo encontrado"
+                          options={laserTypes.map(t => ({ value: t.id, label: t.name }))}
+                          value={selectedLaserTypeId}
+                          onChange={(val) => setSelectedLaserTypeId(val)}
+                          placeholder="Selecione a tecnologia"
+                          emptyText="Nenhuma tecnologia cadastrada"
                           pageSize={10}
                         />
+                        <div className="mt-3">
+                          <Label htmlFor="manufacturer">Fabricante</Label>
+                          <Combobox
+                            options={manufacturers.map(m => ({ value: m.id, label: m.name }))}
+                            value={selectedManufacturerId}
+                            onChange={(val) => {
+                              setSelectedManufacturerId(val);
+                              const m = manufacturers.find(x => x.id === val);
+                              handleInputChange("deviceBrand", m?.name || "");
+                              handleInputChange("deviceModel", "");
+                            }}
+                            placeholder="Selecione o fabricante"
+                            emptyText="Nenhum fabricante cadastrado"
+                            pageSize={10}
+                          />
+                        </div>
+                        <div className="mt-3">
+                          <Label htmlFor="deviceModel">Modelo do Laser</Label>
+                          <Combobox
+                            options={(equipmentIndex.byManufacturer[selectedManufacturerId] || [])
+                              .filter(it => !selectedLaserTypeId || it.typeId === selectedLaserTypeId)
+                              .map(it => ({ value: it.model, label: it.model }))}
+                            value={formData.deviceModel}
+                            onChange={(val) => { handleInputChange("deviceModel", val); }}
+                            placeholder="Selecione o modelo..."
+                            emptyText="Nenhum modelo encontrado"
+                            pageSize={10}
+                          />
+                        </div>
                         <div className={`mt-3 p-3 rounded-lg border ${verifyStatus?.found ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
                           <div className="flex items-center gap-2 font-semibold">
                             {verifyLoading ? (
@@ -750,16 +972,15 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                           <div className="text-sm text-slate-700 mt-1 space-y-1">
                             {verifyStatus?.found && (
                               <>
-                                <p><strong>Nome:</strong> {verifyStatus.name}</p>
-                                {verifyStatus.registration && <p><strong>Registro:</strong> {verifyStatus.registration}</p>}
-                                {verifyStatus.type && <p><strong>Tipo:</strong> {verifyStatus.type}</p>}
-                                {verifyStatus.category && <p><strong>Categoria:</strong> {verifyStatus.category}</p>}
-                                {verifyStatus.applications?.length > 0 && (
-                                  <p><strong>Aplicações:</strong> {verifyStatus.applications.join(', ')}</p>
-                                )}
+                                <p><strong>Fabricante:</strong> {verifyStatus.manufacturer}</p>
+                                <p><strong>Modelo:</strong> {verifyStatus.model}</p>
+                                {verifyStatus.technology && <p><strong>Tecnologia:</strong> {verifyStatus.technology}</p>}
+                                {verifyStatus.registration && <p><strong>Registro ANVISA:</strong> {verifyStatus.registration}</p>}
+                                {verifyStatus.regulatory_status && <p><strong>Status Regulatório:</strong> {verifyStatus.regulatory_status}</p>}
+                                {verifyStatus.risk && <p><strong>Risco Regulatório:</strong> {verifyStatus.risk}</p>}
                                 <div className="mt-2 flex items-center gap-2">
                                   <input id="confirmCat" type="checkbox" className="h-4 w-4" checked={categoryConfirmed} onChange={(e)=>setCategoryConfirmed(e.target.checked)} />
-                                  <label htmlFor="confirmCat" className="text-sm">Confirmo que a categoria informada está correta.</label>
+                                  <label htmlFor="confirmCat" className="text-sm">Confirmo que as informações acima estão corretas.</label>
                                 </div>
                               </>
                             )}
