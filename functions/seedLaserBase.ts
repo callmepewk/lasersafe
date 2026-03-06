@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-// Helpers
+// ---- Helpers ----
 const aliasManufacturer = (name) => {
   const n = (name || '').trim();
   const map = {
@@ -48,13 +48,19 @@ const TYPE_ALIASES = [
 function mapTokenToTypeName(raw) {
   const t = (raw || '').toLowerCase().trim();
   if (!t) return null;
+  if (t === 'diodo') return 'Diodo 800–810nm';
+  if (t === 'co2') return 'CO2 Fracionado';
+  if (t === 'pico') return 'Picolaser';
+  if (t === 'ipl') return 'IPL (Luz Intensa Pulsada)';
+  if (t === 'q-switched') return 'Nd:YAG Q-Switched';
+  if (t.includes('pico alexandrite')) return 'Picolaser';
   if (t.includes('alexandrite')) return 'Alexandrite 755nm';
   if (t.includes('q-sw')) return 'Nd:YAG Q-Switched';
   if (t.includes('nd:yag') && t.includes('fracion')) return 'Nd:YAG fracionado';
+  if (t.includes('nd:yag') && t.includes('ipl')) return 'IPL + Nd:YAG';
   if (t.includes('nd:yag')) return 'Nd:YAG 1064nm';
   if (t.includes('pdl') || t.includes('pulsed dye')) return 'Pulsed Dye Laser (PDL)';
   if (t.includes('bbl')) return 'BroadBand Light';
-  if (t.includes('ipl') && t.includes('nd:yag')) return 'IPL + Nd:YAG';
   if (t.includes('ipl') && t.includes('laser')) return 'IPL + Laser';
   if (t.includes('ipl')) return 'IPL (Luz Intensa Pulsada)';
   if (t.includes('co2') && t.includes('1570')) return 'CO2 + 1570nm';
@@ -75,9 +81,14 @@ function mapTokenToTypeName(raw) {
   return null;
 }
 
-// Dataset (manufacturer | country | model | technology string)
+function chunk(arr, size) {
+  const out = [];
+  for (let i=0;i<arr.length;i+=size) out.push(arr.slice(i, i+size));
+  return out;
+}
+
+// Dataset: [manufacturer, country, model, technology]
 const DATASET = [
-  // Candela (EUA)
   ['Candela','EUA','GentleMax Pro','Alexandrite + Nd:YAG'],
   ['Candela','EUA','GentleMax Pro Plus','Alexandrite + Nd:YAG'],
   ['Candela','EUA','GentleLase Pro','Alexandrite'],
@@ -86,7 +97,6 @@ const DATASET = [
   ['Candela','EUA','VBeam Prima','Pulsed Dye Laser'],
   ['Candela','EUA','Nordlys','IPL + Laser'],
   ['Candela','EUA','Mini GentleYAG','Nd:YAG'],
-  // Cynosure (EUA)
   ['Cynosure','EUA','Elite+','Alexandrite + Nd:YAG'],
   ['Cynosure','EUA','Elite IQ','Alexandrite + Nd:YAG'],
   ['Cynosure','EUA','Apogee Elite','Alexandrite'],
@@ -97,7 +107,6 @@ const DATASET = [
   ['Cynosure','EUA','MedLite C6','Q-switched Nd:YAG'],
   ['Cynosure','EUA','Icon','IPL + Laser'],
   ['Cynosure','EUA','Accolade','Alexandrite'],
-  // Lumenis (Israel)
   ['Lumenis','Israel','M22','IPL + Nd:YAG'],
   ['Lumenis','Israel','Stellar M22','IPL + Nd:YAG'],
   ['Lumenis','Israel','LightSheer ET','Diodo'],
@@ -107,7 +116,6 @@ const DATASET = [
   ['Lumenis','Israel','UltraPulse','CO2'],
   ['Lumenis','Israel','AcuPulse','CO2'],
   ['Lumenis','Israel','ResurFX','Laser fracionado'],
-  // Alma (Israel)
   ['Alma','Israel','Soprano ICE','Diodo'],
   ['Alma','Israel','Soprano ICE Platinum','Diodo'],
   ['Alma','Israel','Soprano Titanium','Diodo'],
@@ -116,82 +124,67 @@ const DATASET = [
   ['Alma','Israel','ClearLift','Nd:YAG fracionado'],
   ['Alma','Israel','Pixel CO2','CO2 fracionado'],
   ['Alma','Israel','Alma Hybrid','CO2 + 1570nm'],
-  // Fotona (Eslovênia)
   ['Fotona','Eslovênia','SP Dynamis','Nd:YAG + Er:YAG'],
   ['Fotona','Eslovênia','SP Spectro','Nd:YAG + Er:YAG'],
   ['Fotona','Eslovênia','StarWalker','Q-switched'],
   ['Fotona','Eslovênia','StarWalker MaQX','Pico'],
   ['Fotona','Eslovênia','TimeWalker Fotona4D','Er:YAG'],
   ['Fotona','Eslovênia','LightWalker','Er:YAG'],
-  // Cutera (EUA)
   ['Cutera','EUA','Excel V','KTP + Nd:YAG'],
   ['Cutera','EUA','Excel HR','Laser depilação'],
   ['Cutera','EUA','Xeo','Multiplataforma'],
   ['Cutera','EUA','Enlighten','Pico'],
   ['Cutera','EUA','GenesisPlus','Nd:YAG'],
-  // Lutronic (Coreia do Sul)
   ['Lutronic','Coreia do Sul','Clarity','Alexandrite + Nd:YAG'],
   ['Lutronic','Coreia do Sul','Clarity II','Alexandrite + Nd:YAG'],
   ['Lutronic','Coreia do Sul','Spectra XT','Q-switched'],
   ['Lutronic','Coreia do Sul','Spectra VRM IV','Q-switched'],
   ['Lutronic','Coreia do Sul','Spectra G2','Q-switched'],
-  // Sciton (EUA)
   ['Sciton','EUA','Joule','Multiplataforma'],
   ['Sciton','EUA','BBL','BroadBand Light'],
   ['Sciton','EUA','BBL HERO','BroadBand Light'],
   ['Sciton','EUA','Halo','Laser híbrido'],
   ['Sciton','EUA','ProFractional','Er:YAG fracionado'],
   ['Sciton','EUA','Contour TRL','Er:YAG'],
-  // Quanta System (Itália)
   ['Quanta','Itália','Discovery Pico','Pico'],
   ['Quanta','Itália','Discovery PICO Plus','Pico'],
   ['Quanta','Itália','Thunder MT','Alexandrite + Nd:YAG'],
   ['Quanta','Itália','Thunder MT Pro','Alexandrite + Nd:YAG'],
   ['Quanta','Itália','Duetto MT EVO','Alexandrite + Nd:YAG'],
   ['Quanta','Itália','Chrome','Nd:YAG + Alexandrite'],
-  // Asclepion (Alemanha)
   ['Asclepion','Alemanha','MeDioStar NeXT','Diodo'],
   ['Asclepion','Alemanha','MeDioStar Monolith','Diodo'],
   ['Asclepion','Alemanha','Dermablate','Er:YAG'],
   ['Asclepion','Alemanha','QuadroStar PRO','Nd:YAG'],
-  // DEKA (Itália)
   ['DEKA','Itália','SmartXide DOT','CO2 fracionado'],
   ['DEKA','Itália','SmartXide Punto','CO2'],
   ['DEKA','Itália','Motus AX','Alexandrite'],
   ['DEKA','Itália','Motus AY','Nd:YAG'],
   ['DEKA','Itália','Synchro REPLA:Y','Er:YAG'],
-  // Solta (EUA)
   ['Solta','EUA','Fraxel Restore','Er:Glass'],
   ['Solta','EUA','Fraxel Dual','1550 + 1927'],
   ['Solta','EUA','Thermage CPT','RF'],
   ['Solta','EUA','Thermage FLX','RF'],
   ['Solta','EUA','Clear + Brilliant','Laser fracionado'],
-  // Aerolase (EUA)
   ['Aerolase','EUA','Neo Elite','Nd:YAG'],
   ['Aerolase','EUA','Neo Elite Pro','Nd:YAG'],
   ['Aerolase','EUA','Era Elite','Er:YAG'],
-  // InMode (Israel)
   ['InMode','Israel','Lumecca','IPL'],
   ['InMode','Israel','DiolazeXL','Diodo'],
   ['InMode','Israel','Optimas','Multiplataforma'],
   ['InMode','Israel','Morpheus8','RF fracionado'],
-  // Venus Concept (Canadá)
   ['Venus','Canadá','Venus Versa','Multiplataforma'],
   ['Venus','Canadá','Venus Velocity','Diodo'],
   ['Venus','Canadá','Venus Viva','RF fracionado'],
-  // Brasil - Vydence
   ['Vydence','Brasil','Etherea MX','Multiplataforma'],
   ['Vydence','Brasil','Etherea Smart','Multiplataforma'],
   ['Vydence','Brasil','Etherea Hybrid','Multiplataforma'],
-  // Brasil - MMOptics
   ['MMOptics','Brasil','Recover','Laser terapêutico'],
   ['MMOptics','Brasil','SmartLaser','Laser terapêutico'],
   ['MMOptics','Brasil','Laser Duo','Laser terapêutico'],
-  // Brasil - Ibramed
   ['Ibramed','Brasil','Polarys','Laser estético'],
   ['Ibramed','Brasil','Laserpulse','Laser terapêutico'],
   ['Ibramed','Brasil','Heccus Turbo','Ultrassom + energia'],
-  // Brasil - HTM
   ['HTM','Brasil','LaserPulse','Laser terapêutico'],
   ['HTM','Brasil','HTM SmartLaser','Laser terapêutico'],
 ];
@@ -201,108 +194,139 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     let user = null;
     try { user = await base44.auth.me(); } catch (_) {}
-    // If user exists and is not admin, block; if no user (e.g., internal run), allow service role
     if (user && user.role !== 'admin') {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    // Ensure Manufacturers
+    // 1) Manufacturers upsert (bulk)
+    const desiredManRows = DATASET.map(([rawMan, rawCountry]) => [aliasManufacturer(rawMan), rawCountry]);
+    const uniqueMans = Array.from(new Map(desiredManRows.map(([n,c]) => [n, c || desiredCountries[n] || null])).entries());
+
     let mans = await base44.asServiceRole.entities.Manufacturer.list();
     const manByName = new Map(mans.map(m => [m.name, m]));
 
-    // Create missing manufacturers with country
-    const ensureMan = async (rawName, countryHint) => {
-      const name = aliasManufacturer(rawName);
-      const country = desiredCountries[name] || countryHint || null;
-      if (!manByName.has(name)) {
-        const created = await base44.asServiceRole.entities.Manufacturer.create({ name, country: country || 'Internacional', verified_sbd: false, verified_anvisa: false });
-        manByName.set(name, created);
-        return created;
-      }
-      const m = manByName.get(name);
-      if (country && m.country !== country) {
-        const upd = await base44.asServiceRole.entities.Manufacturer.update(m.id, { country });
-        manByName.set(name, upd);
-        return upd;
-      }
-      return m;
-    };
+    const mansToCreate = uniqueMans
+      .filter(([name]) => !manByName.has(name))
+      .map(([name, country]) => ({ name, country: country || desiredCountries[name] || 'Internacional', verified_sbd: false, verified_anvisa: false }));
 
-    // Ensure Laser Types
+    if (mansToCreate.length) {
+      // chunk to avoid rate limits
+      for (const part of chunk(mansToCreate, 50)) {
+        await base44.asServiceRole.entities.Manufacturer.bulkCreate(part);
+      }
+      mans = await base44.asServiceRole.entities.Manufacturer.list();
+    }
+
+    // Align countries on existing
+    const currentByName = new Map(mans.map(m => [m.name, m]));
+    const updates = [];
+    for (const [name, country] of uniqueMans) {
+      const desired = country || desiredCountries[name] || null;
+      const cur = currentByName.get(name);
+      if (cur && desired && cur.country !== desired) {
+        updates.push({ id: cur.id, data: { country: desired } });
+      }
+    }
+    for (const part of chunk(updates, 50)) {
+      await Promise.all(part.map(u => base44.asServiceRole.entities.Manufacturer.update(u.id, u.data)));
+    }
+
+    // 2) Laser types ensure (bulk)
     let types = await base44.asServiceRole.entities.LaserType.list();
     const typeByName = new Map(types.map(t => [t.name, t]));
 
-    for (const t of TYPE_ALIASES) {
-      if (!typeByName.has(t)) {
-        const created = await base44.asServiceRole.entities.LaserType.create({ name: t, wavelength: t.match(/\d+\s*nm/i)?.[0] || '' , applications: [] });
-        typeByName.set(t, created);
-      }
+    // derive needed types from dataset tokens
+    const neededFromData = new Set();
+    for (const [, , , techStr] of DATASET) {
+      const tokens = (techStr || '').split('+').map(s => s.trim());
+      tokens.forEach(tok => {
+        const mapped = mapTokenToTypeName(tok) || tok; // fall back to raw label for combos like 'Alexandrite'
+        if (mapped) neededFromData.add(mapped);
+      });
     }
+    TYPE_ALIASES.forEach(t => neededFromData.add(t));
 
-    // Ensure Equipment + EquipmentType links
-    let createdCount = 0, linkedCount = 0, updatedMan = 0;
+    const typesToCreate = Array.from(neededFromData)
+      .filter(n => !typeByName.has(n))
+      .map(n => ({ name: n, wavelength: n.match(/\d+\s*nm/i)?.[0] || '', applications: [] }));
 
-    for (const row of DATASET) {
-      const [rawMan, rawCountry, model, techStr] = row;
-      const man = await ensureMan(rawMan, rawCountry);
-      if (rawCountry && man.country !== rawCountry) updatedMan += 1;
+    for (const part of chunk(typesToCreate, 80)) {
+      if (part.length) await base44.asServiceRole.entities.LaserType.bulkCreate(part);
+    }
+    types = await base44.asServiceRole.entities.LaserType.list();
+    const typeNameToId = new Map(types.map(t => [t.name, t.id]));
 
-      // Upsert equipment by manufacturer + model
-      const existing = await base44.asServiceRole.entities.Equipment.filter({ manufacturer_id: man.id, model });
-      let eq = Array.isArray(existing) && existing[0] ? existing[0] : null;
-      if (!eq) {
-        eq = await base44.asServiceRole.entities.Equipment.create({
-          manufacturer_id: man.id,
+    // 3) Equipments upsert (bulk by manufacturer+model)
+    const manNameToId = new Map((await base44.asServiceRole.entities.Manufacturer.list()).map(m => [m.name, m.id]));
+
+    const allEquip = await base44.asServiceRole.entities.Equipment.list();
+    const eqKey = (manufacturer_id, model) => `${manufacturer_id}__${(model || '').toLowerCase()}`;
+    const existingEqKeys = new Set((allEquip || []).map(e => eqKey(e.manufacturer_id, e.model)));
+
+    const eqToCreate = [];
+    for (const [rawMan, rawCountry, model, techStr] of DATASET) {
+      const manName = aliasManufacturer(rawMan);
+      const manId = manNameToId.get(manName);
+      if (!manId || !model) continue;
+      const key = eqKey(manId, model);
+      if (!existingEqKeys.has(key)) {
+        eqToCreate.push({
+          manufacturer_id: manId,
           model,
           laser_type_id: '',
           registro_anvisa: '',
           status_regulatorio: 'verificar',
           risco_regulatorio: (techStr || '').toLowerCase().includes('ipl') ? 'medio' : 'baixo'
         });
-        createdCount += 1;
+        existingEqKeys.add(key);
       }
+    }
 
-      // Split technologies
+    for (const part of chunk(eqToCreate, 80)) {
+      if (part.length) await base44.asServiceRole.entities.Equipment.bulkCreate(part);
+    }
+
+    // Refresh equipments map
+    const equipments = await base44.asServiceRole.entities.Equipment.list();
+    const eqByKey = new Map(equipments.map(e => [eqKey(e.manufacturer_id, e.model), e]));
+
+    // 4) EquipmentType links (bulk)
+    const existingLinks = await base44.asServiceRole.entities.EquipmentType.list();
+    const existingLinkSet = new Set((existingLinks || []).map(l => `${l.equipment_id}__${l.laser_type_id}`));
+
+    const linksToCreate = [];
+    for (const [rawMan, , model, techStr] of DATASET) {
+      const manName = aliasManufacturer(rawMan);
+      const manId = manNameToId.get(manName);
+      const eq = eqByKey.get(eqKey(manId, model));
+      if (!eq) continue;
       const tokens = (techStr || '').split('+').map(s => s.trim());
-      const wantedTypes = new Set();
+      const mappedNames = new Set();
       for (const tok of tokens) {
-        // special cases
-        const tkn = tok.toLowerCase();
-        if (tkn === 'diodo') { wantedTypes.add('Diodo 800–810nm'); continue; }
-        if (tkn === 'co2') { wantedTypes.add('CO2 Fracionado'); continue; }
-        if (tkn === 'pico') { wantedTypes.add('Picolaser'); continue; }
-        if (tkn === 'pico alexandrite') { wantedTypes.add('Picolaser'); wantedTypes.add('Alexandrite 755nm'); continue; }
-        if (tkn === 'ipl') { wantedTypes.add('IPL (Luz Intensa Pulsada)'); continue; }
-        if (tkn === 'q-switched') { wantedTypes.add('Nd:YAG Q-Switched'); continue; }
-
-        const mapped = mapTokenToTypeName(tok);
-        if (mapped) wantedTypes.add(mapped);
+        const mapped = mapTokenToTypeName(tok) || tok;
+        if (mapped) mappedNames.add(mapped);
       }
-
-      // Ensure all wanted laser types exist
-      for (const tName of wantedTypes) {
-        if (!typeByName.has(tName)) {
-          const createdT = await base44.asServiceRole.entities.LaserType.create({ name: tName, wavelength: tName.match(/\d+\s*nm/i)?.[0] || '' , applications: [] });
-          typeByName.set(tName, createdT);
-        }
-      }
-
-      // Create EquipmentType links
-      const existingLinks = await base44.asServiceRole.entities.EquipmentType.filter({ equipment_id: eq.id });
-      const linkSet = new Set((Array.isArray(existingLinks) ? existingLinks : []).map(l => `${l.equipment_id}__${l.laser_type_id}`));
-      for (const tName of wantedTypes) {
-        const tObj = typeByName.get(tName);
-        if (!tObj) continue;
-        const key = `${eq.id}__${tObj.id}`;
-        if (!linkSet.has(key)) {
-          await base44.asServiceRole.entities.EquipmentType.create({ equipment_id: eq.id, laser_type_id: tObj.id });
-          linkSet.add(key);
-          linkedCount += 1;
+      for (const name of mappedNames) {
+        const typeId = typeNameToId.get(name);
+        if (!typeId) continue;
+        const lk = `${eq.id}__${typeId}`;
+        if (!existingLinkSet.has(lk)) {
+          linksToCreate.push({ equipment_id: eq.id, laser_type_id: typeId });
+          existingLinkSet.add(lk);
         }
       }
     }
 
-    return Response.json({ status: 'ok', created_equipments: createdCount, created_links: linkedCount });
+    for (const part of chunk(linksToCreate, 100)) {
+      if (part.length) await base44.asServiceRole.entities.EquipmentType.bulkCreate(part);
+    }
+
+    return Response.json({
+      status: 'ok',
+      created_manufacturers: mansToCreate ? mansToCreate.length : 0,
+      created_equipments: eqToCreate.length,
+      created_links: linksToCreate.length,
+    });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
