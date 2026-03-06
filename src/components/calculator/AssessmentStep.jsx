@@ -268,7 +268,7 @@ Responda em JSON.`;
       try {
        const allowedTargetValues = targetTypes.map(t => t.value);
        const response = await base44.integrations.Core.InvokeLLM({
-         prompt: `Com base nos dados abaixo, sugira de forma segura e conservadora os três campos para iniciar o cálculo.\n\nCampos a sugerir (um valor cada):\n- target_type (um dos valores EXATOS desta lista: ${'${JSON.stringify(allowedTargetValues)}'})\n- aggressiveness_level (conservador, moderado, agressivo)\n- cooling_intensity (1,2,3,4,5)\n\nDados clínicos de entrada:\n${'${JSON.stringify({
+         prompt: `Com base nos dados abaixo, sugira de forma segura e conservadora os três campos para iniciar o cálculo.\n\nCampos a sugerir (um valor cada):\n- target_type (um dos valores EXATOS desta lista: ${JSON.stringify(allowedTargetValues)})\n- aggressiveness_level (conservador, moderado, agressivo)\n- cooling_intensity (1,2,3,4,5)\n\nDados clínicos de entrada:\n${JSON.stringify({
            procedure_type: assessment.procedure_type,
            region: assessment.region,
            phototype: assessment.phototype,
