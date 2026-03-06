@@ -81,8 +81,10 @@ export default function LaserViabilityCalculator() {
   }, []);
 
   useEffect(() => {
-    calculateViability();
-  }, [formData]);
+    if (verifyStatus?.found && categoryConfirmed) {
+      calculateViability();
+    }
+  }, [formData, verifyStatus, categoryConfirmed]);
 
   const loadUserData = async () => {
     try {
