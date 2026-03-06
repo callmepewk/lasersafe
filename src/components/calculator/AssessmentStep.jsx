@@ -277,7 +277,7 @@ Responda em JSON.`;
            tanning_habits: assessment.tanning_habits,
            patient_age: assessment.patient_age,
            gender: assessment.gender,
-         }, null, 2)}'}\n\nRetorne apenas JSON.`,
+         }, null, 2)}\n\nRetorne apenas JSON.`,
          add_context_from_internet: true,
          response_json_schema: {
            type: 'object',
