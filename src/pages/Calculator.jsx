@@ -101,7 +101,7 @@ export default function Calculator() {
   const saveFinalCalculation = async (finalParams, originalParams, reasoning) => {
       try {
         const payload = {
-            patient_id: selectedPatient.id,
+            patient_id: selectedPatient?.id || `temp_${Date.now()}`,
             professional_id: selectedProfessional.id,
             ...assessment,
             ...finalParams,
@@ -124,7 +124,7 @@ export default function Calculator() {
         if (assessment.acne_scar_classification) patientUpdateData.acne_scar_classification = assessment.acne_scar_classification;
         if (assessment.leeds_acne_scale) patientUpdateData.leeds_acne_scale = assessment.leeds_acne_scale;
 
-        if (Object.keys(patientUpdateData).length > 0) {
+        if (Object.keys(patientUpdateData).length > 0 && selectedPatient?.id && !selectedPatient.is_temp) {
           await Patient.update(selectedPatient.id, patientUpdateData);
         }
 

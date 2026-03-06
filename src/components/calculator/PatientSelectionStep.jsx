@@ -4,6 +4,7 @@ import { User } from "@/entities/User";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Users, Search, User as UserIcon, Calendar } from "lucide-react";
 import { useTranslation } from "@/components/i18n/TranslationContext";
 
@@ -66,6 +67,14 @@ export default function PatientSelectionStep({ selectedPatient, onPatientSelect 
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
+        <div className="mb-4 p-3 rounded-md bg-blue-50 border border-blue-200 text-sm text-blue-900">
+          O cadastro completo do paciente agiliza os cálculos de parâmetros, permitindo o autopreenchimento das informações clínicas.
+        </div>
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
+          <Button type="button" variant="outline" onClick={() => onPatientSelect({ id: `temp_${Date.now()}`, name: 'Paciente não cadastrado', is_temp: true })}>
+            Atender paciente novo (sem cadastro)
+          </Button>
+        </div>
         <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />

@@ -351,7 +351,7 @@ export default function History() {
                     <div className="border-l pl-4 space-y-1 flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <UserIcon className="w-4 h-4 text-blue-600 flex-shrink-0"/>
-                        <p className="font-semibold text-slate-900 truncate">{patientsMap.get(calc.patient_id)?.name || 'Paciente não encontrado'}</p>
+                        <p className="font-semibold text-slate-900 truncate">{patientsMap.get(calc.patient_id)?.name || (calc.patient_id?.startsWith('temp_') ? 'Paciente não cadastrado' : 'Paciente não encontrado')}</p>
                         <Badge className={phototypeColors[calc.phototype] + " border flex-shrink-0"}>
                           Fototipo {calc.phototype}
                         </Badge>
