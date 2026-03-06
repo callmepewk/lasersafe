@@ -21,6 +21,11 @@ export default function DeviceIdentifier({ deviceInfo, onDeviceInfoChange }) {
   const [selectedType, setSelectedType] = useState("all");
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Resetar flag quando o catálogo abre, para não exibir aviso sem interação
+  React.useEffect(() => {
+    if (openCatalog) setHasSearched(false);
+  }, [openCatalog]);
+
   const brandOptions = React.useMemo(() => {
     const arr = Array.from(new Set(laserDatabase.map(l => l.manufacturer).filter(Boolean)));
     return ["all", ...arr.sort()];
@@ -262,7 +267,7 @@ Retorne apenas o JSON.`,
                       </button>
                     ))
                   ) : (
-                    hasSearched ? (
+                    (hasSearched && (search.trim().length > 0 || selectedBrand !== "all" || selectedType !== "all")) ? (
                       <div className="flex items-start gap-2 p-3 bg-amber-50 text-amber-800 rounded-md border border-amber-200">
                         <AlertCircle className="w-4 h-4 mt-0.5 text-amber-700" />
                         <p className="text-sm">
