@@ -60,16 +60,11 @@ export default function DeviceIdentifier({ deviceInfo, onDeviceInfoChange }) {
       // Upload da foto
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setDevicePhoto(file_url);
-
-      // Identificação automática do aparelho com IA usando o banco de dados
-      setIdentifying(true);
-      
-      const databaseContext = `Banco de dados de referência com ${laserDatabase.length} equipamentos conhecidos:
-${laserDatabase.map(laser => 
-  `${laser.name} - ${laser.manufacturer} - ${laser.wavelength} - ${laser.type}`
-).join('\n')}`;
-
-      const identificationResult = await base44.integrations.Core.InvokeLLM({
+      // Identificação automática removida: apenas salva a foto e permite preenchimento manual ou catálogo
+      setIdentifying(false);
+      onDeviceInfoChange({ ...(deviceInfo || {}), photo: file_url });
+      /* Removido OCR/IA */
+      /* const identificationResult = await base44.integrations.Core.InvokeLLM({
         prompt: `Você é um perito em reconhecimento de equipamentos de laser dermatológico.
 TAREFA:
 1) Faça OCR COMPLETO da imagem (logos, etiquetas, painel/display) e extraia todos os textos relevantes.
@@ -109,24 +104,10 @@ Retorne apenas o JSON.`,
           },
           required: ["brand", "model", "type", "wavelength", "description"]
         }
-      });
-
-      // Normalização leve para diodo 808/810
-      const norm = { ...identificationResult };
-      const wl = (norm.wavelength || '').toLowerCase();
-      if ((/808|810/).test(wl)) {
-        if (!((norm.type || '').toLowerCase().includes('diodo'))) {
-          norm.type = 'Laser Diodo 808/810nm';
-        }
-      }
-
-      // Atualizar informações do dispositivo
-      onDeviceInfoChange({
-        photo: file_url,
-        ...norm
-      });
-
-      setIdentificationSuccess(true);
+      }); */
+      // Atualização apenas da foto; preenchimento manual/catálogo recomendado
+      // onDeviceInfoChange já chamado acima
+      setIdentificationSuccess(false);
       setIdentifying(false);
     } catch (error) {
       console.error("Erro ao processar foto:", error);
