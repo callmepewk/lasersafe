@@ -56,35 +56,41 @@ function LayoutContent({ children, currentPageName }) {
   const { t } = useTranslation();
 
   const navigationItems = [
+    // 1) Dashboard
     {
       title: t("nav.dashboard", "Dashboard"),
       url: createPageUrl("Dashboard"),
       icon: LayoutDashboard,
     },
-    {
-      title: t("nav.patients", "Pacientes"),
-      url: createPageUrl("Patients"),
-      icon: Users,
-    },
-    {
-      title: t("nav.professionals", "Profissionais"),
-      url: createPageUrl("Professionals"),
-      icon: UserCheck,
-    },
+    // 2) Calculadora
     {
       title: t("nav.calculator", "Calculadora"),
       url: createPageUrl("Calculator"),
       icon: Calculator,
     },
-    {
-      title: t("nav.prescriptions", "Receitas"),
-      url: createPageUrl("Prescriptions"),
-      icon: FileText,
-    },
+    // 3) Histórico
     {
       title: t("nav.history", "Histórico"),
       url: createPageUrl("History"),
       icon: FileClock,
+    },
+    // 4) Pacientes
+    {
+      title: t("nav.patients", "Pacientes"),
+      url: createPageUrl("Patients"),
+      icon: Users,
+    },
+    // 5) Profissionais
+    {
+      title: t("nav.professionals", "Profissionais"),
+      url: createPageUrl("Professionals"),
+      icon: UserCheck,
+    },
+    // Demais páginas
+    {
+      title: t("nav.prescriptions", "Receitas"),
+      url: createPageUrl("Prescriptions"),
+      icon: FileText,
     },
     {
       title: t("nav.formulas", "Fórmulas Magistrais"),

@@ -140,6 +140,31 @@ export default function Dashboard() {
         loading={isAcceptingTerms}
         onAccept={handleAcceptTerms}
       />
+      {/* Promo Card - Calculadora Inteligente */}
+      <div className="sticky top-0 z-30 mb-4">
+        <div className="rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white shadow-xl ring-1 ring-black/5 flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-3">
+            <div className="size-10 sm:size-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-inner">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-bold">Calculadora Inteligente de Parâmetros de Laser</h2>
+              <p className="text-xs sm:text-sm text-white/90">
+                Ajuste parâmetros com base em tecnologia, fototipo, região tratada e alvo terapêutico.
+              </p>
+            </div>
+          </div>
+          <div className="flex-1" />
+          <Link to={createPageUrl('Calculator')}>
+            <Button className="bg-white text-indigo-700 hover:bg-white/90 font-semibold">
+              Abrir Calculadora
+            </Button>
+          </Link>
+        </div>
+        <p className="mt-2 text-xs text-slate-600">
+          Ferramenta desenvolvida para auxiliar profissionais na definição de parâmetros técnicos de lasers dermatológicos com base em variáveis clínicas.
+        </p>
+      </div>
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 md:mb-8 gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
           <div className="space-y-1">
@@ -260,9 +285,9 @@ export default function Dashboard() {
                 <TrendingUp className="w-4 h-4 mr-2" /> {t("dashboard.viewHistory", "Ver Histórico")}
               </Button>
             </Link>
-            <Link to={createPageUrl("Support")}>
+            <Link to={createPageUrl("Tutorial")}>
               <Button className="w-full bg-indigo-500 hover:bg-indigo-600 text-white shadow-md">
-                <MessageSquare className="w-4 h-4 mr-2" /> {t("dashboard.aiChatbot", "Chatbot com IA")}
+                <GraduationCap className="w-4 h-4 mr-2" /> {t("dashboard.tutorial", "Tutorial")}
               </Button>
             </Link>
             <Link to={createPageUrl("Reference")}>
