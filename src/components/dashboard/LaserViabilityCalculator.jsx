@@ -195,6 +195,34 @@ export default function LaserViabilityCalculator() {
         ]);
         mans = await base44.entities.Manufacturer.list();
       }
+      // Normalize manufacturer countries based on curated list
+      const desiredCountries = {
+        "Candela": "EUA",
+        "Cynosure": "EUA",
+        "Lumenis": "Israel",
+        "Alma Lasers": "Israel",
+        "Fotona": "Eslovênia",
+        "Cutera": "EUA",
+        "Lutronic": "Coreia do Sul",
+        "Sciton": "EUA",
+        "Quanta System": "Itália",
+        "Asclepion Laser Technologies": "Alemanha",
+        "DEKA": "Itália",
+        "Solta Medical": "EUA",
+        "Aerolase": "EUA",
+        "InMode": "Israel",
+        "Venus Concept": "Canadá",
+        "Vydence Medical": "Brasil",
+        "Industra Technologies": "Brasil",
+        "MMOptics": "Brasil",
+        "Ibramed": "Brasil",
+        "HTM Eletrônica": "Brasil"
+      };
+      const toUpdate = (mans || []).filter(m => desiredCountries[m.name] && m.country !== desiredCountries[m.name]);
+      if (toUpdate.length) {
+        await Promise.all(toUpdate.map(m => base44.entities.Manufacturer.update(m.id, { country: desiredCountries[m.name] })));
+        mans = await base44.entities.Manufacturer.list();
+      }
       const manByName = Object.fromEntries(mans.map(m => [m.name, m]));
 
       // Laser types
@@ -204,6 +232,26 @@ export default function LaserViabilityCalculator() {
           "CO2 Fracionado","Er:YAG","Nd:YAG 1064nm","Nd:YAG Q-Switched","Alexandrite 755nm","Diodo 800–810nm","Diodo 940nm","Diodo 980nm","Pulsed Dye Laser (PDL)","Ruby Laser","Picolaser","IPL (Luz Intensa Pulsada)","Laser vascular","Laser para pigmento","Laser para resurfacing","Laser para depilação","Laser fracionado não ablativo"
         ];
         await base44.entities.LaserType.bulkCreate(typeNames.map(n => ({ name: n, wavelength: n.includes("nm") ? n.match(/\d+\s*nm/i)?.[0] || "" : "", applications: [] })));
+        types = await base44.entities.LaserType.list();
+      }
+      // Ensure extra laser types from curated dataset exist
+      const extraTypes = [
+        "Multiplataforma",
+        "BroadBand Light",
+        "RF fracionado",
+        "RF",
+        "KTP + Nd:YAG",
+        "CO2 + 1570nm",
+        "Er:Glass",
+        "1550 + 1927",
+        "Alexandrite + Nd:YAG",
+        "Nd:YAG + Er:YAG",
+        "IPL + Laser"
+      ];
+      const existingTypeNames = new Set(types.map(t => t.name));
+      const missing = extraTypes.filter(n => !existingTypeNames.has(n));
+      if (missing.length) {
+        await base44.entities.LaserType.bulkCreate(missing.map(n => ({ name: n, wavelength: n.includes("nm") ? n.match(/\d+\s*nm/i)?.[0] || "" : "", applications: [] })));
         types = await base44.entities.LaserType.list();
       }
       const typeByName = Object.fromEntries(types.map(t => [t.name, t]));
