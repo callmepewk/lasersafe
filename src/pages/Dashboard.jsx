@@ -168,10 +168,7 @@ export default function Dashboard() {
           Ferramenta desenvolvida para auxiliar profissionais na definição de parâmetros técnicos de lasers dermatológicos com base em variáveis clínicas.
         </p>
 
-        {/* Calculadora de Viabilidade (reposicionada abaixo da Calculadora Inteligente) */}
-        <div className="mb-6">
-          <LaserViabilityCalculator />
-        </div>
+
       </div>
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 md:mb-8 gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
