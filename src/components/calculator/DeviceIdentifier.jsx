@@ -270,7 +270,7 @@ Retorne apenas o JSON.`,
                         </p>
                       </div>
                     ) : null
-                  )
+                  )}
                 </div>
               </div>
             </DialogContent>
