@@ -76,6 +76,7 @@ export default function LaserViabilityCalculator() {
   const [selectedLaserTypeId, setSelectedLaserTypeId] = useState("");
   const [selectedManufacturerId, setSelectedManufacturerId] = useState("");
   const [allModels, setAllModels] = useState([]);
+  const [showCatalog, setShowCatalog] = useState(false);
   const handleDeviceInfoChange = (info) => {
     setDeviceInfo(info);
     if (info.model) handleInputChange("deviceModel", info.model);
@@ -1321,22 +1322,27 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                         />
                         <div className="mt-3">
                           <Label htmlFor="deviceModel">Modelo do Laser</Label>
-                          <Combobox
-                            options={filteredModelOptions}
-                            value={formData.deviceModel ? `${formData.deviceModel}__${selectedManufacturerId || ''}` : ''}
-                            onChange={(val) => {
-                              const [model, manId] = String(val).split('__');
-                              handleInputChange("deviceModel", model);
-                              if (manId) {
-                                setSelectedManufacturerId(manId);
-                                const m = manufacturers.find(x => x.id === manId);
-                                handleInputChange("deviceBrand", m?.name || "");
-                              }
-                            }}
-                            placeholder="Selecione o modelo..."
-                            emptyText="Nenhum modelo encontrado"
-                            pageSize={10}
-                          />
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1">
+                              <Combobox
+                                options={filteredModelOptions}
+                                value={formData.deviceModel ? `${formData.deviceModel}__${selectedManufacturerId || ''}` : ''}
+                                onChange={(val) => {
+                                  const [model, manId] = String(val).split('__');
+                                  handleInputChange("deviceModel", model);
+                                  if (manId) {
+                                    setSelectedManufacturerId(manId);
+                                    const m = manufacturers.find(x => x.id === manId);
+                                    handleInputChange("deviceBrand", m?.name || "");
+                                  }
+                                }}
+                                placeholder="Selecione o modelo..."
+                                emptyText="Nenhum modelo encontrado"
+                                pageSize={10}
+                              />
+                            </div>
+                            <Button variant="outline" size="sm" onClick={() => setShowCatalog(true)}>Catálogo</Button>
+                          </div>
                         </div>
                         <div className="mt-3">
                           <Label htmlFor="manufacturer">Fabricante</Label>
@@ -1536,7 +1542,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                           disabled={!canCalculate}
                         >
                           <Calculator className="w-5 h-5 mr-2" />
-                          Calcular Viabilidade
+                          Calcular Viabilidade (Etapa Final)
                         </Button>
                       </div>
                     </TabsContent>
@@ -1651,6 +1657,41 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
         </div>
         </CardContent>
         </Card>
+
+        {/* Catálogo de modelos */}
+        <Dialog open={showCatalog} onOpenChange={setShowCatalog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Selecionar do Catálogo</DialogTitle>
+            </DialogHeader>
+            <div className="max-h-[60vh] overflow-y-auto divide-y">
+              {filteredModelOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  className="w-full text-left p-3 hover:bg-slate-50"
+                  onClick={() => {
+                    const [model, manId] = String(opt.value).split('__');
+                    handleInputChange("deviceModel", model);
+                    if (manId) {
+                      setSelectedManufacturerId(manId);
+                      const m = manufacturers.find(x => x.id === manId);
+                      handleInputChange("deviceBrand", m?.name || "");
+                    }
+                    setShowCatalog(false);
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+              {filteredModelOptions.length === 0 && (
+                <p className="text-sm text-slate-500 p-3">Nenhum modelo disponível.</p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCatalog(false)}>Fechar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* POPUP RESUMO DO CÁLCULO */}
         <Dialog open={showCalcDialog} onOpenChange={setShowCalcDialog}>
