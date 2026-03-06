@@ -291,6 +291,173 @@ export default function LaserViabilityCalculator() {
         eqs = await base44.entities.Equipment.list();
       }
 
+      // Append extended equipment base (~120) if missing
+      try {
+        const baseLarge = [
+          // Candela
+          { m: "Candela", model: "GentleMax Pro", t: "Alexandrite 755nm" },
+          { m: "Candela", model: "GentleMax Pro Plus", t: "Alexandrite 755nm" },
+          { m: "Candela", model: "GentleLase Pro", t: "Alexandrite 755nm" },
+          { m: "Candela", model: "GentleYAG Pro", t: "Nd:YAG 1064nm" },
+          { m: "Candela", model: "VBeam Perfecta", t: "Pulsed Dye Laser (PDL)" },
+          { m: "Candela", model: "VBeam Prima", t: "Pulsed Dye Laser (PDL)" },
+          { m: "Candela", model: "Nordlys", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Candela", model: "Mini GentleYAG", t: "Nd:YAG 1064nm" },
+          // Cynosure
+          { m: "Cynosure", model: "Elite+", t: "Alexandrite 755nm" },
+          { m: "Cynosure", model: "Elite IQ", t: "Alexandrite 755nm" },
+          { m: "Cynosure", model: "Apogee Elite", t: "Alexandrite 755nm" },
+          { m: "Cynosure", model: "Apogee Elite Plus", t: "Alexandrite 755nm" },
+          { m: "Cynosure", model: "PicoSure", t: "Picolaser" },
+          { m: "Cynosure", model: "PicoSure Pro", t: "Picolaser" },
+          { m: "Cynosure", model: "Icon", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Cynosure", model: "RevLite SI", t: "Nd:YAG Q-Switched" },
+          { m: "Cynosure", model: "MedLite C6", t: "Nd:YAG Q-Switched" },
+          { m: "Cynosure", model: "SmartLipo", t: "Diodo 980nm" },
+          { m: "Cynosure", model: "Accolade", t: "Alexandrite 755nm" },
+          { m: "Cynosure", model: "Cynergy", t: "Laser vascular" },
+          // Lumenis
+          { m: "Lumenis", model: "M22", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Lumenis", model: "LightSheer ET", t: "Diodo 800–810nm" },
+          { m: "Lumenis", model: "LightSheer Duet", t: "Diodo 800–810nm" },
+          { m: "Lumenis", model: "LightSheer Desire", t: "Diodo 800–810nm" },
+          { m: "Lumenis", model: "UltraPulse", t: "CO2 Fracionado" },
+          { m: "Lumenis", model: "AcuPulse", t: "CO2 Fracionado" },
+          { m: "Lumenis", model: "ResurFX", t: "Laser fracionado não ablativo" },
+          { m: "Lumenis", model: "Stellar M22", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Lumenis", model: "Splendor X", t: "Alexandrite 755nm" },
+          // Alma Lasers
+          { m: "Alma Lasers", model: "Soprano ICE", t: "Diodo 800–810nm" },
+          { m: "Alma Lasers", model: "Soprano ICE Platinum", t: "Diodo 800–810nm" },
+          { m: "Alma Lasers", model: "Soprano Titanium", t: "Diodo 800–810nm" },
+          { m: "Alma Lasers", model: "Harmony XL", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Alma Lasers", model: "Harmony XL Pro", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Alma Lasers", model: "Accent Prime", t: "Laser para resurfacing" },
+          { m: "Alma Lasers", model: "Pixel CO2", t: "CO2 Fracionado" },
+          { m: "Alma Lasers", model: "ClearLift", t: "Nd:YAG Q-Switched" },
+          { m: "Alma Lasers", model: "Alma Hybrid", t: "Laser fracionado não ablativo" },
+          // Fotona
+          { m: "Fotona", model: "SP Dynamis", t: "Er:YAG" },
+          { m: "Fotona", model: "SP Spectro", t: "Er:YAG" },
+          { m: "Fotona", model: "StarWalker", t: "Picolaser" },
+          { m: "Fotona", model: "StarWalker MaQX", t: "Picolaser" },
+          { m: "Fotona", model: "TimeWalker Fotona4D", t: "Er:YAG" },
+          { m: "Fotona", model: "LightWalker", t: "Er:YAG" },
+          { m: "Fotona", model: "SmoothEye", t: "Er:YAG" },
+          // Cutera
+          { m: "Cutera", model: "Excel V", t: "Laser vascular" },
+          { m: "Cutera", model: "Excel HR", t: "Alexandrite 755nm" },
+          { m: "Cutera", model: "Xeo", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Cutera", model: "enlighten", t: "Picolaser" },
+          { m: "Cutera", model: "Secret RF", t: "Laser para resurfacing" },
+          { m: "Cutera", model: "truSculpt", t: "Laser para resurfacing" },
+          { m: "Cutera", model: "GenesisPlus", t: "Nd:YAG 1064nm" },
+          // Lutronic
+          { m: "Lutronic", model: "Clarity", t: "Alexandrite 755nm" },
+          { m: "Lutronic", model: "Clarity II", t: "Alexandrite 755nm" },
+          { m: "Lutronic", model: "Spectra XT", t: "Nd:YAG Q-Switched" },
+          { m: "Lutronic", model: "Spectra VRM IV", t: "Nd:YAG Q-Switched" },
+          { m: "Lutronic", model: "Spectra G2", t: "Nd:YAG 1064nm" },
+          { m: "Lutronic", model: "Ultraformer III", t: "Laser para resurfacing" },
+          { m: "Lutronic", model: "Infini RF", t: "Laser para resurfacing" },
+          // Sciton
+          { m: "Sciton", model: "Joule", t: "Laser para resurfacing" },
+          { m: "Sciton", model: "BBL", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Sciton", model: "BBL Hero", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Sciton", model: "Halo", t: "Laser fracionado não ablativo" },
+          { m: "Sciton", model: "ProFractional", t: "Er:YAG" },
+          { m: "Sciton", model: "SkinTyte", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Sciton", model: "Contour TRL", t: "Er:YAG" },
+          // Quanta System
+          { m: "Quanta System", model: "Discovery Pico", t: "Picolaser" },
+          { m: "Quanta System", model: "Discovery PICO Plus", t: "Picolaser" },
+          { m: "Quanta System", model: "Thunder MT", t: "Alexandrite 755nm" },
+          { m: "Quanta System", model: "Thunder MT Pro", t: "Alexandrite 755nm" },
+          { m: "Quanta System", model: "Duetto MT EVO", t: "Alexandrite 755nm" },
+          { m: "Quanta System", model: "Chrome", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Quanta System", model: "Youlaser", t: "CO2 Fracionado" },
+          // Asclepion
+          { m: "Asclepion Laser Technologies", model: "MeDioStar NeXT", t: "Diodo 800–810nm" },
+          { m: "Asclepion Laser Technologies", model: "MeDioStar Monolith", t: "Diodo 800–810nm" },
+          { m: "Asclepion Laser Technologies", model: "Dermablate", t: "Er:YAG" },
+          { m: "Asclepion Laser Technologies", model: "QuadroStar PRO", t: "Laser vascular" },
+          { m: "Asclepion Laser Technologies", model: "TattooStar", t: "Nd:YAG Q-Switched" },
+          // DEKA
+          { m: "DEKA", model: "SmartXide DOT", t: "CO2 Fracionado" },
+          { m: "DEKA", model: "SmartXide Punto", t: "CO2 Fracionado" },
+          { m: "DEKA", model: "Motus AX", t: "Alexandrite 755nm" },
+          { m: "DEKA", model: "Motus AY", t: "Alexandrite 755nm" },
+          { m: "DEKA", model: "Synchro REPLA:Y", t: "Alexandrite 755nm" },
+          // Solta Medical
+          { m: "Solta Medical", model: "Fraxel Restore", t: "Laser fracionado não ablativo" },
+          { m: "Solta Medical", model: "Fraxel Dual", t: "Laser fracionado não ablativo" },
+          { m: "Solta Medical", model: "Thermage CPT", t: "Laser para resurfacing" },
+          { m: "Solta Medical", model: "Thermage FLX", t: "Laser para resurfacing" },
+          { m: "Solta Medical", model: "Clear + Brilliant", t: "Laser fracionado não ablativo" },
+          // Aerolase
+          { m: "Aerolase", model: "Neo Elite", t: "Nd:YAG 1064nm" },
+          { m: "Aerolase", model: "Neo Elite Pro", t: "Nd:YAG 1064nm" },
+          { m: "Aerolase", model: "Era Elite", t: "Er:YAG" },
+          // Venus Concept
+          { m: "Venus Concept", model: "Venus Velocity", t: "Diodo 800–810nm" },
+          { m: "Venus Concept", model: "Venus Versa", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Venus Concept", model: "Venus Viva", t: "Laser fracionado não ablativo" },
+          // InMode
+          { m: "InMode", model: "Lumecca", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "InMode", model: "DiolazeXL", t: "Diodo 800–810nm" },
+          { m: "InMode", model: "Optimas", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "InMode", model: "Morpheus8", t: "Laser para resurfacing" },
+          // Sharplight
+          { m: "Sharplight", model: "Omnimax", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Sharplight", model: "Omnimax S4", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Sharplight", model: "Formax", t: "IPL (Luz Intensa Pulsada)" },
+          { m: "Sharplight", model: "Rapid DPC", t: "IPL (Luz Intensa Pulsada)" },
+          // Wontech
+          { m: "Wontech", model: "PicoCare", t: "Picolaser" },
+          { m: "Wontech", model: "PicoHi", t: "Picolaser" },
+          { m: "Wontech", model: "Pastelle", t: "Nd:YAG Q-Switched" },
+          // Jeisys
+          { m: "Jeisys Medical", model: "TriBeam", t: "Nd:YAG Q-Switched" },
+          { m: "Jeisys Medical", model: "Edge ONE", t: "CO2 Fracionado" },
+          { m: "Jeisys Medical", model: "SmoothCool", t: "IPL (Luz Intensa Pulsada)" },
+          // Hironic
+          { m: "Hironic", model: "PicoHI 300", t: "Picolaser" },
+          { m: "Hironic", model: "New Doublo", t: "Laser para resurfacing" },
+          // Vydence
+          { m: "Vydence Medical", model: "Etherea MX", t: "Laser fracionado não ablativo" },
+          { m: "Vydence Medical", model: "Etherea Smart", t: "Laser para resurfacing" },
+          { m: "Vydence Medical", model: "Etherea Hybrid", t: "Laser fracionado não ablativo" },
+          // Industra (Brasil)
+          { m: "Industra Technologies", model: "Etherea Platform", t: "Laser fracionado não ablativo" },
+          { m: "Industra Technologies", model: "Etherea Advance", t: "Laser para resurfacing" },
+          // MMOptics (Brasil)
+          { m: "MMOptics", model: "Recover", t: "Laser para pigmento" },
+          { m: "MMOptics", model: "SmartLaser", t: "Laser para pigmento" },
+          { m: "MMOptics", model: "Laser Duo", t: "Laser para pigmento" },
+          // Ibramed (Brasil)
+          { m: "Ibramed", model: "Polarys", t: "Laser para resurfacing" },
+          { m: "Ibramed", model: "Laserpulse", t: "Diodo 800–810nm" },
+          { m: "Ibramed", model: "Heccus Turbo", t: "Laser para resurfacing" },
+          // HTM (Brasil)
+          { m: "HTM Eletrônica", model: "LaserPulse", t: "Diodo 800–810nm" },
+          { m: "HTM Eletrônica", model: "HTM SmartLaser", t: "Laser para pigmento" },
+          // Tonederm (Brasil)
+          { m: "Tonederm", model: "Spectra VRM", t: "Nd:YAG Q-Switched" },
+          { m: "Tonederm", model: "Spectra Max", t: "Nd:YAG Q-Switched" }
+        ];
+
+        const existingSet = new Set((Array.isArray(eqs)?eqs:[]).map(e => `${e.manufacturer_id}__${(e.model||'').toLowerCase()}`));
+        const toCreate2 = baseLarge.map(s => ({
+          manufacturer_id: manByName[s.m]?.id || "",
+          model: s.model,
+          laser_type_id: typeByName[s.t]?.id || "",
+          registro_anvisa: "",
+          status_regulatorio: "verificar",
+          risco_regulatorio: (s.m && ["Honkon","ADSS","Sincoheren"].includes(s.m)) ? "alto" : (s.t && s.t.includes("IPL") ? "medio" : "baixo")
+        })).filter(e => e.manufacturer_id && e.model && !existingSet.has(`${e.manufacturer_id}__${e.model.toLowerCase()}`));
+        if (toCreate2.length) { await base44.entities.Equipment.bulkCreate(toCreate2); eqs = await base44.entities.Equipment.list(); }
+      } catch(_) {}
+
       // Build indexes
       const byManufacturer = {};
       const byTech = {};
