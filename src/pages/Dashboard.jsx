@@ -201,30 +201,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      <!-- moved to bottom after Ações Rápidas per mobile order -->
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8 hidden"
-        <StatCard
-          title={t("dashboard.registeredPatients", "Pacientes Cadastrados")}
-          value={stats.patients}
-          icon={Users}
-          color="text-blue-500"
-          link={createPageUrl("Patients")}
-        />
-        <StatCard
-          title={t("dashboard.registeredProfessionals", "Profissionais Cadastrados")}
-          value={stats.professionals}
-          icon={UserCheck}
-          color="text-green-500"
-          link={createPageUrl("Professionals")}
-        />
-        <StatCard
-          title={t("dashboard.totalProcedures", "Total de Procedimentos")}
-          value={stats.calculations}
-          icon={Calculator}
-          color="text-purple-500"
-          link={createPageUrl("History")}
-        />
-      </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6">
         <Card className="bg-white/90 backdrop-blur-sm shadow-lg border-0">
