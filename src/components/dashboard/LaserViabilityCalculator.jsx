@@ -63,6 +63,7 @@ export default function LaserViabilityCalculator() {
   // Popup state for manual calc
   const [activeTab, setActiveTab] = useState('investment');
   const [showCalcDialog, setShowCalcDialog] = useState(false);
+  const [hasCalculated, setHasCalculated] = useState(false);
 
   // Verificação regulatória (sem IA)
   const [verifyLoading, setVerifyLoading] = useState(false);
@@ -1053,6 +1054,7 @@ export default function LaserViabilityCalculator() {
 
   const handleCalculateNow = () => {
     calculateViability();
+    setHasCalculated(true);
     setShowCalcDialog(true);
   };
 
@@ -1275,7 +1277,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
           <div className="max-h-[70vh] md:max-h-[75vh] overflow-y-auto pr-1 md:pr-2 overflow-x-hidden">
           <div className="grid lg:grid-cols-3 gap-6">
             {/* COLUNA ESQUERDA - INPUTS */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
               <Card className="bg-slate-50 border-slate-200">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2 text-slate-700">
@@ -1310,6 +1312,11 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
 
                     {/* TAB: INVESTIMENTO */}
                     <TabsContent value="investment" className="space-y-4">
+                      <div className="flex justify-end mb-2">
+                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => setActiveTab('operation')}>
+                          Próxima seção
+                        </Button>
+                      </div>
                       <div>
                         <Label htmlFor="laserType">Tecnologia do Laser</Label>
                         <Combobox
@@ -1457,10 +1464,20 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                           placeholder="10"
                         />
                       </div>
+                    <div className="pt-2">
+                      <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700" onClick={() => setActiveTab('operation')}>
+                        Próxima seção
+                      </Button>
+                    </div>
                     </TabsContent>
 
                     {/* TAB: OPERAÇÃO */}
                     <TabsContent value="operation" className="space-y-4">
+                       <div className="flex justify-end mb-2">
+                         <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => setActiveTab('revenue')}>
+                           Próxima seção
+                         </Button>
+                       </div>
                       <div>
                         <Label htmlFor="sessionPrice">Custo Variável por Procedimento</Label>
                         <Input
@@ -1511,10 +1528,20 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                           placeholder="6"
                         />
                       </div>
+                    <div className="pt-2">
+                      <Button className="w-full md:w-auto bg-blue-600 hover:bg-blue-700" onClick={() => setActiveTab('revenue')}>
+                        Próxima seção
+                      </Button>
+                    </div>
                     </TabsContent>
 
                     {/* TAB: RECEITA */}
                     <TabsContent value="revenue" className="space-y-4">
+                       <div className="flex justify-end mb-2">
+                         <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => { calculateViability(); setHasCalculated(true); }}>
+                           Salvar e Calcular
+                         </Button>
+                       </div>
                       <div>
                         <Label htmlFor="avgSessionPrice">Preço Médio por Sessão (Tabela)</Label>
                         <Input
@@ -1539,7 +1566,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                         <div className="md:static fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-sm px-4 py-3 md:px-0 md:py-0 border-t md:border-0">
                           <Button 
                             className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg h-12"
-                            onClick={calculateViability}
+                            onClick={() => { calculateViability(); setHasCalculated(true); }}
                             disabled={!canCalculate}
                           >
                             <Calculator className="w-5 h-5 mr-2" />
@@ -1553,72 +1580,11 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
               </Card>
             </div>
 
-            {/* COLUNA DIREITA - PREVIEW/RESULTADOS */}
-            <div className="lg:col-span-1">
-              <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-2xl md:sticky md:top-4 mb-4">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <TrendingUp className="w-6 h-6" />
-                    Análise de Viabilidade (Preview)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Preço Líquido por Sessão */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <p className="text-blue-100 text-sm mb-1">Preço Líquido por Sessão (Receita)</p>
-                    <p className="text-3xl font-bold">{formatCurrency(results.netPricePerSession)}</p>
-                  </div>
 
-                  {/* Margem Bruta */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <p className="text-blue-100 text-sm mb-1">Lucro por Sessão</p>
-                    <p className="text-3xl font-bold">{formatCurrency(results.grossMargin)}</p>
-                    <p className="text-blue-200 text-sm mt-1">({results.grossMarginPercent.toFixed(1)}%)</p>
-                  </div>
-
-                  {/* Capacidade Máxima Mensal */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <p className="text-blue-100 text-sm mb-1">Capacidade Máxima Mensal</p>
-                    <p className="text-3xl font-bold">{results.maxMonthlyCapacity.toFixed(0)} sessões</p>
-                  </div>
-
-                  {/* Receita Potencial Mensal */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <p className="text-blue-100 text-sm mb-1">Receita Potencial Mensal</p>
-                    <p className="text-3xl font-bold">{formatCurrency(results.potentialMonthlyRevenue)}</p>
-                  </div>
-
-                  {/* Lucro Mensal */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <p className="text-blue-100 text-sm mb-1">Lucro Líquido Mensal</p>
-                    <p className="text-3xl font-bold">{formatCurrency(results.monthlyProfit)}</p>
-                  </div>
-
-                  {/* ROI */}
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <p className="text-blue-100 text-sm mb-1">Retorno do Investimento (ROI)</p>
-                    <p className="text-3xl font-bold flex items-center gap-2">
-                      <Clock className="w-6 h-6" />
-                      {results.roiMonths > 0 ? results.roiMonths.toFixed(1) : 'N/A'} meses
-                    </p>
-                  </div>
-
-                  {/* Viabilidade */}
-                  <div className={`${getViabilityColor(results.viabilityRating)} bg-opacity-90 backdrop-blur-sm rounded-lg p-4 border border-white/30`}>
-                    <p className="text-white text-lg font-bold text-center">
-                      {getViabilityLabel(results.viabilityRating)}
-                    </p>
-                  </div>
-
-                  <div className="pt-2 text-xs text-blue-100 text-center italic">
-                    Pressione as 3 abas acima para ver o relatório completo
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
 
-          {/* AÇÕES */}
+          {/* AÇÕES - mostram só após cálculo */}
+          {hasCalculated && (
           <div className="flex flex-wrap gap-3 mt-6 justify-center">
 
             <Button 
@@ -1646,6 +1612,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
               Compartilhar WhatsApp
             </Button>
           </div>
+          )}
 
           {/* RODAPÉ */}
           <div className="mt-8 p-6 bg-gradient-to-r from-slate-900 to-blue-900 rounded-xl text-center">
