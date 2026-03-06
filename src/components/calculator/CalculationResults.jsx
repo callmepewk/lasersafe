@@ -54,9 +54,13 @@ export default function CalculationResults({ patient, professional, assessment, 
 
   const handleSave = async () => {
       const isAdjusted = JSON.stringify(originalParams) !== JSON.stringify(adjustedParams);
+      const cleanedAdjusted = { ...adjustedParams };
+      const cleanedOriginal = isAdjusted ? { ...originalParams } : null;
+      delete cleanedAdjusted.advancedCalculation;
+      if (cleanedOriginal) delete cleanedOriginal.advancedCalculation;
       await onSaveCalculation(
-          adjustedParams,
-          isAdjusted ? originalParams : null,
+          cleanedAdjusted,
+          isAdjusted ? cleanedOriginal : null,
           isAdjusted ? adjustmentReasoning : null
       );
       toast({

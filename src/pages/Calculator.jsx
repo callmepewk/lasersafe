@@ -293,6 +293,7 @@ Seja EXTREMAMENTE técnico, preciso e forneça informações que um profissional
 
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: prompt,
+        add_context_from_internet: true,
         file_urls: [drBelezaPhotoUrl],
         response_json_schema: {
           type: "object",
