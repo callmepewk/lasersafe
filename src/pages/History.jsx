@@ -380,8 +380,10 @@ export default function History() {
                         <Badge className={phototypeColors[calc.phototype] + " border flex-shrink-0"}>
                           Fototipo {calc.phototype}
                         </Badge>
-                        {calc.patient_id?.startsWith('temp_') && (
+                        {calc.patient_id?.startsWith('temp_') ? (
                           <Badge variant="outline" className="flex-shrink-0">Paciente não cadastrado</Badge>
+                        ) : (
+                          <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 flex-shrink-0">Paciente cadastrado</Badge>
                         )}
                       </div>
                       <div className="flex items-center gap-2 text-sm text-slate-600">

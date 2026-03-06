@@ -146,6 +146,7 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
     region: "",
     phototype: patient.phototype || "",
     patient_age: calculateAge(patient.birth_date) || "",
+    gender: patient.gender || "",
     skin_color: patient.skin_tone || "",
     skin_sensitivity: patient.skin_sensitivity || "",
     sun_exposure: "",
@@ -323,6 +324,18 @@ Responda em JSON.`;
                 <div>
                   <Label htmlFor="patient_age">Idade do Paciente</Label>
                   <Input id="patient_age" type="number" value={assessment.patient_age} onChange={(e) => handleInputChange("patient_age", parseInt(e.target.value))} placeholder="Anos" />
+                </div>
+
+                <div>
+                  <Label htmlFor="gender">Gênero</Label>
+                  <Select value={assessment.gender} onValueChange={(value) => handleInputChange("gender", value)}>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                      <SelectItem value="feminino">Feminino</SelectItem>
+                      <SelectItem value="outro">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
