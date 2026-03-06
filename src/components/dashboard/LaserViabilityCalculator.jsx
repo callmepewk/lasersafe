@@ -246,7 +246,13 @@ export default function LaserViabilityCalculator() {
         "1550 + 1927",
         "Alexandrite + Nd:YAG",
         "Nd:YAG + Er:YAG",
-        "IPL + Laser"
+        "IPL + Laser",
+        "IPL + Nd:YAG",
+        "Q-switched Nd:YAG",
+        "Nd:YAG fracionado",
+        "Er:YAG fracionado",
+        "Laser fracionado",
+        "Laser híbrido"
       ];
       const existingTypeNames = new Set(types.map(t => t.name));
       const missing = extraTypes.filter(n => !existingTypeNames.has(n));
@@ -504,6 +510,62 @@ export default function LaserViabilityCalculator() {
           risco_regulatorio: (s.m && ["Honkon","ADSS","Sincoheren"].includes(s.m)) ? "alto" : (s.t && s.t.includes("IPL") ? "medio" : "baixo")
         })).filter(e => e.manufacturer_id && e.model && !existingSet.has(`${e.manufacturer_id}__${e.model.toLowerCase()}`));
         if (toCreate2.length) { await base44.entities.Equipment.bulkCreate(toCreate2); eqs = await base44.entities.Equipment.list(); }
+      } catch(_) {}
+
+      // Apply curated tech corrections and upserts
+      try {
+        const curated = [
+          { m: "Candela", model: "Nordlys", t: "IPL + Laser" },
+          { m: "Lumenis", model: "M22", t: "IPL + Nd:YAG" },
+          { m: "Lumenis", model: "Stellar M22", t: "IPL + Nd:YAG" },
+          { m: "Alma Lasers", model: "Harmony XL", t: "Multiplataforma" },
+          { m: "Alma Lasers", model: "Harmony XL Pro", t: "Multiplataforma" },
+          { m: "Alma Lasers", model: "ClearLift", t: "Nd:YAG fracionado" },
+          { m: "Alma Lasers", model: "Alma Hybrid", t: "CO2 + 1570nm" },
+          { m: "Fotona", model: "SP Dynamis", t: "Nd:YAG + Er:YAG" },
+          { m: "Fotona", model: "SP Spectro", t: "Nd:YAG + Er:YAG" },
+          { m: "Sciton", model: "BBL", t: "BroadBand Light" },
+          { m: "Sciton", model: "BBL Hero", t: "BroadBand Light" },
+          { m: "Sciton", model: "ProFractional", t: "Er:YAG fracionado" },
+          { m: "Quanta System", model: "Chrome", t: "Nd:YAG + Alexandrite" },
+          { m: "Cutera", model: "Excel V", t: "KTP + Nd:YAG" },
+          { m: "Cutera", model: "Xeo", t: "Multiplataforma" },
+          { m: "DEKA", model: "SmartXide Punto", t: "CO2" },
+          { m: "DEKA", model: "Synchro REPLA:Y", t: "Er:YAG" },
+          { m: "Solta Medical", model: "Fraxel Restore", t: "Er:Glass" },
+          { m: "Solta Medical", model: "Fraxel Dual", t: "1550 + 1927" },
+          { m: "Solta Medical", model: "Clear + Brilliant", t: "Laser fracionado" },
+          { m: "Vydence Medical", model: "Etherea MX", t: "Multiplataforma" },
+          { m: "Vydence Medical", model: "Etherea Smart", t: "Multiplataforma" },
+          { m: "Vydence Medical", model: "Etherea Hybrid", t: "Multiplataforma" }
+        ];
+        const eqMap = new Map((Array.isArray(eqs)?eqs:[]).map(e => [`${e.manufacturer_id}__${(e.model||'').toLowerCase()}`, e]));
+        const updates = [];
+        const creates = [];
+        curated.forEach(s => {
+          const man = manByName[s.m];
+          const type = typeByName[s.t] || null;
+          if (!man) return;
+          const key = `${man.id}__${s.model.toLowerCase()}`;
+          if (eqMap.has(key)) {
+            const existing = eqMap.get(key);
+            if (type && existing.laser_type_id !== type.id) {
+              updates.push(base44.entities.Equipment.update(existing.id, { laser_type_id: type.id, status_regulatorio: existing.status_regulatorio || "verificar" }));
+            }
+          } else {
+            creates.push({
+              manufacturer_id: man.id,
+              model: s.model,
+              laser_type_id: type ? type.id : "",
+              registro_anvisa: "",
+              status_regulatorio: "verificar",
+              risco_regulatorio: s.t.includes("IPL") ? "medio" : "baixo"
+            });
+          }
+        });
+        if (creates.length) await base44.entities.Equipment.bulkCreate(creates);
+        if (updates.length) await Promise.all(updates);
+        eqs = await base44.entities.Equipment.list();
       } catch(_) {}
 
       // Build indexes
