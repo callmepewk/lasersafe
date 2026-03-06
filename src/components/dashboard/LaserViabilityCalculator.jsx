@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { base44 } from "@/api/base44Client";
 import { Combobox } from "@/components/ui/combobox";
 import { laserDatabase } from "@/components/calculator/laserDatabase";
 import { laserTechOptions } from "@/components/calculator/laserTechOptions";
-import DeviceIdentifier from "@/components/calculator/DeviceIdentifier";
+
 import {
   Dialog,
   DialogContent,
@@ -1202,6 +1202,50 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
     { key: 'operation', label: 'Operação' },
     { key: 'revenue', label: 'Receita' },
   ];
+
+  // Filtragem inteligente baseada na tecnologia selecionada
+  const simplifiedName = useMemo(() => simplifyLabel(selectedLaserTypeId), [selectedLaserTypeId]);
+  const selectedTechIds = useMemo(() => {
+    if (!simplifiedName) return [];
+    return (laserTypes || []).filter(t => simplifyLabel(t.name) === simplifiedName).map(t => t.id);
+  }, [simplifiedName, laserTypes]);
+
+  const filteredManufacturers = useMemo(() => {
+    if (!selectedTechIds.length) return manufacturers;
+    const manSet = new Set();
+    selectedTechIds.forEach(tid => {
+      (equipmentIndex.byTech[tid] || []).forEach(it => manSet.add(it.manufacturerId));
+    });
+    return manufacturers.filter(m => manSet.has(m.id));
+  }, [manufacturers, equipmentIndex.byTech, selectedTechIds]);
+
+  const filteredModelEntries = useMemo(() => {
+    if (selectedTechIds.length) {
+      const map = new Map();
+      selectedTechIds.forEach(tid => {
+        (equipmentIndex.byTech[tid] || []).forEach(it => {
+          if (!selectedManufacturerId || it.manufacturerId === selectedManufacturerId) {
+            const key = `${it.model}__${it.manufacturerId}`;
+            if (!map.has(key)) map.set(key, it);
+          }
+        });
+      });
+      return Array.from(map.values());
+    }
+    // Sem tecnologia selecionada, usa todos os modelos conhecidos (sem fabricante)
+    return (allModels || []).map(m => ({ model: m, manufacturerId: "" }));
+  }, [equipmentIndex.byTech, selectedTechIds, selectedManufacturerId, allModels]);
+
+  const filteredModelOptions = useMemo(() => {
+    const manName = (id) => manufacturers.find(m => m.id === id)?.name || '';
+    return filteredModelEntries
+      .map(it => ({
+        value: `${it.model}__${it.manufacturerId || ''}`,
+        label: it.manufacturerId ? `${it.model} (${manName(it.manufacturerId)})` : it.model,
+      }))
+      .sort((a,b) => a.label.localeCompare(b.label,'pt-BR'));
+  }, [filteredModelEntries, manufacturers]);
+
   const canCalculate = verifyStatus?.found && categoryConfirmed; // requires multi-tech verification as above
 
   return (
@@ -1276,24 +1320,36 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                           pageSize={10}
                         />
                         <div className="mt-3">
-                          <Label htmlFor="manufacturer">Fabricante</Label>
+                          <Label htmlFor="deviceModel">Modelo do Laser</Label>
                           <Combobox
-                            options={manufacturers.map(m => ({ value: m.id, label: m.name }))}
-                            value={selectedManufacturerId}
-                            onChange={(val) => { setSelectedManufacturerId(val); }}
-                            placeholder="Selecione o fabricante"
-                            emptyText="Nenhum fabricante cadastrado"
+                            options={filteredModelOptions}
+                            value={formData.deviceModel ? `${formData.deviceModel}__${selectedManufacturerId || ''}` : ''}
+                            onChange={(val) => {
+                              const [model, manId] = String(val).split('__');
+                              handleInputChange("deviceModel", model);
+                              if (manId) {
+                                setSelectedManufacturerId(manId);
+                                const m = manufacturers.find(x => x.id === manId);
+                                handleInputChange("deviceBrand", m?.name || "");
+                              }
+                            }}
+                            placeholder="Selecione o modelo..."
+                            emptyText="Nenhum modelo encontrado"
                             pageSize={10}
                           />
                         </div>
                         <div className="mt-3">
-                          <Label htmlFor="deviceModel">Modelo do Laser</Label>
+                          <Label htmlFor="manufacturer">Fabricante</Label>
                           <Combobox
-                            options={allModels.map(m => ({ value: m, label: m }))}
-                            value={formData.deviceModel}
-                            onChange={(val) => { handleInputChange("deviceModel", val); }}
-                            placeholder="Selecione o modelo..."
-                            emptyText="Nenhum modelo encontrado"
+                            options={filteredManufacturers.map(m => ({ value: m.id, label: m.name }))}
+                            value={selectedManufacturerId}
+                            onChange={(val) => {
+                              setSelectedManufacturerId(val);
+                              const m = manufacturers.find(x => x.id === val);
+                              handleInputChange("deviceBrand", m?.name || "");
+                            }}
+                            placeholder="Selecione o fabricante"
+                            emptyText="Nenhum fabricante cadastrado"
                             pageSize={10}
                           />
                         </div>
@@ -1332,19 +1388,9 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                             </p>
                           </div>
                         </div>
-                        <div className="mt-4">
-                          <DeviceIdentifier deviceInfo={deviceInfo} onDeviceInfoChange={handleDeviceInfoChange} />
-                        </div>
+
                       </div>
-                      <div>
-                        <Label htmlFor="deviceBrand">Marca do Laser</Label>
-                        <Input
-                          id="deviceBrand"
-                          value={formData.deviceBrand}
-                          onChange={(e) => handleInputChange("deviceBrand", e.target.value)}
-                          placeholder="Ex: Ibramed"
-                        />
-                      </div>
+
                       <div>
                         <Label htmlFor="purchaseCost">Custo de Aquisição (Compra)</Label>
                         <Input
@@ -1566,14 +1612,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
 
           {/* AÇÕES */}
           <div className="flex flex-wrap gap-3 mt-6 justify-center">
-            <Button 
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
-              onClick={handleCalculateNow}
-              disabled={!canCalculate}
-            >
-              <Calculator className="w-4 h-4 mr-2" />
-              Calcular Agora
-            </Button>
+
             <Button 
               variant="outline" 
               className="border-blue-600 text-blue-600 hover:bg-blue-50"
