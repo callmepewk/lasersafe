@@ -194,7 +194,7 @@ Retorne apenas o JSON.`,
             <DialogTrigger asChild>
               <Button type="button" variant="outline">Selecionar laser no catálogo</Button>
             </DialogTrigger>
-            <DialogContent className="w-[95vw] sm:max-w-xl max-h-[80vh] overflow-hidden">
+            <DialogContent className="w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[75vh] overflow-hidden">
               <DialogHeader>
                 <DialogTitle>Selecionar Laser</DialogTitle>
               </DialogHeader>
