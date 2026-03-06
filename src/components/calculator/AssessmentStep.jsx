@@ -187,13 +187,19 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
     assessment.phototype &&
     assessment.target_type
   );
+  const hasSuggestionInfo = Boolean(
+    (assessment.laser_type && (assessment.laser_type !== 'Outro' || assessment.other_laser_type)) &&
+    (assessment.procedure_type && (assessment.procedure_type !== 'Outro' || assessment.other_procedure_type)) &&
+    assessment.region &&
+    assessment.phototype
+  );
 
   const isFractional = /fracionad|scanner|fraction|microlens/i.test(`${assessment.laser_type || ''} ${assessment.handpiece_type || ''}`);
 
   useEffect(() => { (async () => { try { const u = await base44.auth.me(); setCurrentUser(u); } catch(e){} })(); }, []);
 
   const suggestWithAI = async () => {
-    if (!hasRequiredClinicalInfo) return;
+    if (!hasSuggestionInfo) return;
     setAiLoading(true);
     try {
       const device = assessment.device_info || {};
@@ -315,9 +321,30 @@ Responda em JSON.`;
    const handleInputChange = (field, value) => {
     setAssessment(prev => {
       const updated = { ...prev, [field]: value };
-      
+
+      // Se mudar a tecnologia, zera ponteira
       if (field === 'laser_type') {
         updated.handpiece_type = '';
+      }
+
+      // Auto-seleciona Região do Corpo a partir da Região tratada
+      if (field === 'region') {
+        const txt = (value || '').toString().toLowerCase();
+        const match = 
+          (txt.includes('face') || txt.includes('rosto') || txt.includes('couro')) ? 'head' :
+          (txt.includes('pesco')) ? 'neck' :
+          (txt.includes('tórax') || txt.includes('torax') || txt.includes('peito') || txt.includes('peitoral')) ? 'chest' :
+          (txt.includes('ombro')) ? 'shoulders' :
+          (txt.includes('braç') || txt.includes('brac') || txt.includes('axila')) ? 'arms' :
+          (txt.includes('mão') || txt.includes('mao') || txt.includes('dorso da mão')) ? 'hands' :
+          (txt.includes('abdô') || txt.includes('abdo') || txt.includes('barriga')) ? 'abdomen' :
+          (txt.includes('cintur') || txt.includes('lombar') || txt.includes('flanco')) ? 'waist' :
+          (txt.includes('glúte') || txt.includes('glute') || txt.includes('nádega') || txt.includes('nadega')) ? 'glutes' :
+          (txt.includes('íntim') || txt.includes('intim') || txt.includes('virilha') || txt.includes('genit')) ? 'intimate' :
+          (txt.includes('perna') || txt.includes('coxa') || txt.includes('panturr')) ? 'legs' :
+          (txt.includes('pé') || txt.includes('pe ') || txt.includes('pés') || txt.includes('pes ')) ? 'feet' :
+          '';
+        updated.body_region = match;
       }
       
       return updated;
@@ -466,7 +493,7 @@ Responda em JSON.`;
 
                 {/* Info Master - Sugestão e Autopreenchimento */}
                 <div className="md:col-span-2">
-                  {currentUser?.current_plan === 'Master' ? (
+                  {(currentUser?.current_plan === 'Master' || currentUser?.role === 'admin') ? (
                     <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-3">
                       <p className="text-sm text-indigo-900">
                         Plano Master: a IA pode sugerir automaticamente Tipo de Alvo, Nível de Agressividade e Intensidade do Resfriamento com base em Procedimento, Região, Fototipo, Sensibilidade, Exposição Solar e Hábitos de Bronzeamento.
@@ -803,7 +830,7 @@ Responda em JSON.`;
       </Card>
 
       {/* Sugestão de IA (Plano Master) */}
-      {currentUser?.current_plan === 'Master' && (
+      {(currentUser?.current_plan === 'Master' || currentUser?.role === 'admin') && (
         <Card className="bg-indigo-50 border-indigo-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-indigo-900">
@@ -812,14 +839,14 @@ Responda em JSON.`;
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-3">
-              <Button type="button" onClick={suggestWithAI} disabled={!hasRequiredClinicalInfo || aiLoading} className="bg-indigo-600 hover:bg-indigo-700">
+              <Button type="button" onClick={suggestWithAI} disabled={!hasSuggestionInfo || aiLoading} className="bg-indigo-600 hover:bg-indigo-700">
                 {aiLoading ? 'Gerando...' : 'Sugerir com IA'}
               </Button>
               <p className="text-sm text-indigo-800">As sugestões são auxiliares. A decisão final é do profissional.</p>
             </div>
-            {!hasRequiredClinicalInfo && (
+            {!hasSuggestionInfo && (
               <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-md px-3 py-2">
-                Preencha todas as informações clínicas para habilitar a sugestão de parâmetros.
+                Preencha Procedimento, Região, Fototipo e Tecnologia para habilitar a sugestão.
               </p>
             )}
             {aiSuggestions && (
