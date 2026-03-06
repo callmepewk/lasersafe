@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -16,6 +17,18 @@ export default function DeviceIdentifier({ deviceInfo, onDeviceInfoChange }) {
   const [identificationSuccess, setIdentificationSuccess] = useState(false);
   const [openCatalog, setOpenCatalog] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+
+  const brandOptions = React.useMemo(() => {
+    const arr = Array.from(new Set(laserDatabase.map(l => l.manufacturer).filter(Boolean)));
+    return ["all", ...arr.sort()];
+  }, []);
+
+  const typeOptions = React.useMemo(() => {
+    const arr = Array.from(new Set(laserDatabase.map(l => l.type).filter(Boolean)));
+    return ["all", ...arr.sort()];
+  }, []);
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -199,14 +212,41 @@ Retorne apenas o JSON.`,
                 <DialogTitle>Selecionar Laser</DialogTitle>
               </DialogHeader>
               <div className="space-y-3">
-                <Input placeholder="Buscar por nome, fabricante, tipo..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Input placeholder="Buscar por nome, fabricante, tipo..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                  <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Marca" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brandOptions.map((b) => (
+                        <SelectItem key={b} value={b}>{b === "all" ? "Todas as marcas" : b}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedType} onValueChange={setSelectedType}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Tecnologia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {typeOptions.map((t) => (
+                        <SelectItem key={t} value={t}>{t === "all" ? "Todas as tecnologias" : t}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="border rounded-md h-[55vh] overflow-y-auto p-2 bg-white/60">
                   {laserDatabase
-                    .filter(l => (
-                      (l.name?.toLowerCase()||"").includes(search.toLowerCase()) ||
-                      (l.manufacturer?.toLowerCase()||"").includes(search.toLowerCase()) ||
-                      (l.type?.toLowerCase()||"").includes(search.toLowerCase())
-                    ))
+                    .filter((l) => {
+                      const s = search.toLowerCase();
+                      const matchesSearch =
+                        (l.name?.toLowerCase() || "").includes(s) ||
+                        (l.manufacturer?.toLowerCase() || "").includes(s) ||
+                        (l.type?.toLowerCase() || "").includes(s);
+                      const matchesBrand = selectedBrand === "all" || (l.manufacturer || "") === selectedBrand;
+                      const matchesType = selectedType === "all" || (l.type || "") === selectedType;
+                      return matchesSearch && matchesBrand && matchesType;
+                    })
                     .map((l, idx) => (
                       <button key={idx} className="w-full text-left p-3 rounded hover:bg-slate-100 border-b last:border-b-0"
                         onClick={() => {
