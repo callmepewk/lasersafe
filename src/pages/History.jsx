@@ -12,8 +12,6 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useTranslation } from "@/components/i18n/TranslationContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import PageBlockChecker from "../components/system/PageBlockChecker";
 import {

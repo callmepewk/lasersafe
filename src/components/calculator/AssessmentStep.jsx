@@ -638,10 +638,11 @@ Responda em JSON.`;
                       <span>5 (profundo)</span>
                     </div>
                   </div>
-                </div>
-              </div>
+                  </div>
+                  </div>
+                  )}
 
-              <div className="border-t pt-4">
+                  <div className="border-t pt-4">
                 <h4 className="font-semibold text-slate-800 mb-3">Classificações Dermatológicas (opcional)</h4>
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
