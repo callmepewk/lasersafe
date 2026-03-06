@@ -252,7 +252,10 @@ export default function LaserViabilityCalculator() {
         "Nd:YAG fracionado",
         "Er:YAG fracionado",
         "Laser fracionado",
-        "Laser híbrido"
+        "Laser híbrido",
+        "Laser terapêutico",
+        "Laser estético",
+        "Ultrassom + energia"
       ];
       const existingTypeNames = new Set((types || []).map(t => t.name));
       const missing = extraTypes.filter(n => !existingTypeNames.has(n));
@@ -515,26 +518,49 @@ export default function LaserViabilityCalculator() {
       // Apply curated tech corrections and upserts
       try {
         const curated = [
+          // Candela combos
+          { m: "Candela", model: "GentleMax Pro", t: "Alexandrite + Nd:YAG" },
+          { m: "Candela", model: "GentleMax Pro Plus", t: "Alexandrite + Nd:YAG" },
           { m: "Candela", model: "Nordlys", t: "IPL + Laser" },
+          // Lumenis
           { m: "Lumenis", model: "M22", t: "IPL + Nd:YAG" },
           { m: "Lumenis", model: "Stellar M22", t: "IPL + Nd:YAG" },
+          { m: "Lumenis", model: "Splendor X", t: "Alexandrite + Nd:YAG" },
+          // Cynosure
+          { m: "Cynosure", model: "Elite+", t: "Alexandrite + Nd:YAG" },
+          { m: "Cynosure", model: "Elite IQ", t: "Alexandrite + Nd:YAG" },
+          // Alma
           { m: "Alma Lasers", model: "Harmony XL", t: "Multiplataforma" },
           { m: "Alma Lasers", model: "Harmony XL Pro", t: "Multiplataforma" },
           { m: "Alma Lasers", model: "ClearLift", t: "Nd:YAG fracionado" },
           { m: "Alma Lasers", model: "Alma Hybrid", t: "CO2 + 1570nm" },
+          // Fotona
           { m: "Fotona", model: "SP Dynamis", t: "Nd:YAG + Er:YAG" },
           { m: "Fotona", model: "SP Spectro", t: "Nd:YAG + Er:YAG" },
+          // Sciton
           { m: "Sciton", model: "BBL", t: "BroadBand Light" },
           { m: "Sciton", model: "BBL Hero", t: "BroadBand Light" },
+          { m: "Sciton", model: "Halo", t: "Laser híbrido" },
           { m: "Sciton", model: "ProFractional", t: "Er:YAG fracionado" },
+          // Quanta System
           { m: "Quanta System", model: "Chrome", t: "Nd:YAG + Alexandrite" },
+          { m: "Quanta System", model: "Thunder MT", t: "Alexandrite + Nd:YAG" },
+          { m: "Quanta System", model: "Thunder MT Pro", t: "Alexandrite + Nd:YAG" },
+          { m: "Quanta System", model: "Duetto MT EVO", t: "Alexandrite + Nd:YAG" },
+          // Cutera
           { m: "Cutera", model: "Excel V", t: "KTP + Nd:YAG" },
           { m: "Cutera", model: "Xeo", t: "Multiplataforma" },
+          // DEKA
           { m: "DEKA", model: "SmartXide Punto", t: "CO2" },
           { m: "DEKA", model: "Synchro REPLA:Y", t: "Er:YAG" },
+          // Solta
           { m: "Solta Medical", model: "Fraxel Restore", t: "Er:Glass" },
           { m: "Solta Medical", model: "Fraxel Dual", t: "1550 + 1927" },
           { m: "Solta Medical", model: "Clear + Brilliant", t: "Laser fracionado" },
+          // Lutronic combos
+          { m: "Lutronic", model: "Clarity", t: "Alexandrite + Nd:YAG" },
+          { m: "Lutronic", model: "Clarity II", t: "Alexandrite + Nd:YAG" },
+          // Vydence
           { m: "Vydence Medical", model: "Etherea MX", t: "Multiplataforma" },
           { m: "Vydence Medical", model: "Etherea Smart", t: "Multiplataforma" },
           { m: "Vydence Medical", model: "Etherea Hybrid", t: "Multiplataforma" }
