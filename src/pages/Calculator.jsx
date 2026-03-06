@@ -217,6 +217,9 @@ export default function Calculator() {
       const prompt = `Você é o Dr. Beleza, especialista renomado em lasers dermatológicos e parâmetros avançados de equipamentos.
 
 DADOS CLÍNICOS DO CASO:
+
+ESPECIFICAÇÕES DO EQUIPAMENTO (OBRIGATÓRIO CONSIDERAR):
+${JSON.stringify({ brand: (assessmentData.device_info||{}).brand, model: (assessmentData.device_info||{}).model, type: (assessmentData.device_info||{}).type, wavelength: (assessmentData.device_info||{}).wavelength, description: (assessmentData.device_info||{}).description }, null, 2)}
 - Laser/Tecnologia: ${laser}
 - Ponteira: ${assessmentData.handpiece_type || 'Não especificada'}
 - Procedimento: ${procedure}
