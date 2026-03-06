@@ -178,6 +178,7 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
   const [currentUser, setCurrentUser] = useState(null);
   const [aiSuggestions, setAiSuggestions] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [autofillLoading, setAutofillLoading] = useState(false);
 
   const hasRequiredClinicalInfo = Boolean(
     (assessment.laser_type && (assessment.laser_type !== 'Outro' || assessment.other_laser_type)) &&
@@ -251,8 +252,65 @@ Responda em JSON.`;
         }
       });
       setAiSuggestions(res);
-    } finally { setAiLoading(false); }
-  };
+      } finally { setAiLoading(false); }
+      };
+
+      const autofillMasterFields = async () => {
+      const hasInfo = Boolean(
+       assessment.procedure_type &&
+       assessment.region &&
+       assessment.phototype &&
+       assessment.sun_exposure &&
+       assessment.tanning_habits
+      );
+      if (!hasInfo) return;
+      setAutofillLoading(true);
+      try {
+       const allowedTargetValues = targetTypes.map(t => t.value);
+       const response = await base44.integrations.Core.InvokeLLM({
+         prompt: `Com base nos dados abaixo, sugira de forma segura e conservadora os três campos para iniciar o cálculo.\n\nCampos a sugerir (um valor cada):\n- target_type (um dos valores EXATOS desta lista: ${'${JSON.stringify(allowedTargetValues)}'})\n- aggressiveness_level (conservador, moderado, agressivo)\n- cooling_intensity (1,2,3,4,5)\n\nDados clínicos de entrada:\n${'${JSON.stringify({
+           procedure_type: assessment.procedure_type,
+           region: assessment.region,
+           phototype: assessment.phototype,
+           skin_sensitivity: assessment.skin_sensitivity,
+           sun_exposure: assessment.sun_exposure,
+           tanning_habits: assessment.tanning_habits,
+           patient_age: assessment.patient_age,
+           gender: assessment.gender,
+         }, null, 2)}'}\n\nRetorne apenas JSON.`,
+         add_context_from_internet: true,
+         response_json_schema: {
+           type: 'object',
+           properties: {
+             target_type: { type: 'string' },
+             aggressiveness_level: { type: 'string', enum: ['conservador','moderado','agressivo'] },
+             cooling_intensity: { type: 'string', enum: ['1','2','3','4','5'] },
+             rationale: { type: 'string' }
+           },
+           required: ['target_type','aggressiveness_level','cooling_intensity']
+         }
+       });
+
+       let target = response.target_type;
+       const allowed = allowedTargetValues;
+       if (!allowed.includes(target || '')) {
+         const lc = (target || '').toLowerCase();
+         const byValue = targetTypes.find(t => t.value.toLowerCase() === lc || t.value.toLowerCase().includes(lc) || lc.includes(t.value.toLowerCase()));
+         const byLabel = targetTypes.find(t => (t.label || '').toLowerCase().includes(lc));
+         const matched = byValue || byLabel;
+         if (matched) target = matched.value;
+       }
+
+       setAssessment(prev => ({
+         ...prev,
+         target_type: allowed.includes(target || '') ? target : prev.target_type,
+         aggressiveness_level: response.aggressiveness_level || prev.aggressiveness_level,
+         cooling_intensity: response.cooling_intensity || prev.cooling_intensity,
+       }));
+      } finally {
+       setAutofillLoading(false);
+      }
+      };
 
    const handleInputChange = (field, value) => {
     setAssessment(prev => {
@@ -275,6 +333,13 @@ Responda em JSON.`;
 
   const selectedLaser = laserTechOptions.find(l => l.value === assessment.laser_type);
   const availableHandpieces = assessment.laser_type ? (handpiecesByLaser[assessment.laser_type] || []) : [];
+  const hasAutofillInfo = Boolean(
+    assessment.procedure_type &&
+    assessment.region &&
+    assessment.phototype &&
+    assessment.sun_exposure &&
+    assessment.tanning_habits
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -397,6 +462,31 @@ Responda em JSON.`;
                       <SelectItem value="frequentemente">Frequentemente</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                {/* Info Master - Sugestão e Autopreenchimento */}
+                <div className="md:col-span-2">
+                  {currentUser?.current_plan === 'Master' ? (
+                    <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-3">
+                      <p className="text-sm text-indigo-900">
+                        Plano Master: a IA pode sugerir automaticamente Tipo de Alvo, Nível de Agressividade e Intensidade do Resfriamento com base em Procedimento, Região, Fototipo, Sensibilidade, Exposição Solar e Hábitos de Bronzeamento.
+                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <Button type="button" className="bg-indigo-600 hover:bg-indigo-700" onClick={autofillMasterFields} disabled={autofillLoading || !hasAutofillInfo}>
+                          {autofillLoading ? 'Analisando...' : 'Preencher automaticamente'}
+                        </Button>
+                        {!hasAutofillInfo && (
+                          <span className="text-xs text-indigo-800">Preencha os campos acima para habilitar.</span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <p className="text-sm text-slate-700">
+                        Recurso disponível no Plano Master: sugestão automática de Tipo de Alvo, Nível de Agressividade e Intensidade do Resfriamento com base nos dados clínicos acima.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="md:col-span-2">
