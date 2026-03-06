@@ -52,6 +52,11 @@ iframe[src*="base44"],
 /* Print styles */
 html, body { overflow-x: hidden; }
 
+img, video, canvas { max-width: 100%; height: auto; }
+
+/* Ensure full-width containers don't overflow */
+.container, .max-w-7xl, .max-w-6xl, .max-w-5xl { max-width: 100% !important; }
+
 body { font-size: 16px; line-height: 1.5; }
 
 /* Headings responsive clamp */

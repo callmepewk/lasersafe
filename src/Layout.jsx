@@ -191,6 +191,15 @@ function LayoutContent({ children, currentPageName }) {
         document.head.appendChild(twitterTitle);
       }
       twitterTitle.setAttribute('content', APP_NAME);
+
+      // viewport (force correct scaling on mobile)
+      let viewport = document.querySelector('meta[name="viewport"]');
+      if (!viewport) {
+        viewport = document.createElement('meta');
+        viewport.setAttribute('name', 'viewport');
+        document.head.appendChild(viewport);
+      }
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1');
     } catch (e) { /* noop */ }
   }, []);
 

@@ -1272,7 +1272,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
         </CardHeader>
 
         <CardContent className="p-4 md:p-6">
-          <div className="max-h-[70vh] md:max-h-[75vh] overflow-y-auto pr-1 md:pr-2">
+          <div className="max-h-[70vh] md:max-h-[75vh] overflow-y-auto pr-1 md:pr-2 overflow-x-hidden">
           <div className="grid lg:grid-cols-3 gap-6">
             {/* COLUNA ESQUERDA - INPUTS */}
             <div className="lg:col-span-2">
@@ -1555,7 +1555,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
 
             {/* COLUNA DIREITA - PREVIEW/RESULTADOS */}
             <div className="lg:col-span-1">
-              <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-2xl sticky top-4">
+              <Card className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-2xl md:sticky md:top-4 mb-4">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-xl">
                     <TrendingUp className="w-6 h-6" />
