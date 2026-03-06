@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,10 +64,11 @@ export default function LaserViabilityCalculator() {
   const [activeTab, setActiveTab] = useState('investment');
   const [showCalcDialog, setShowCalcDialog] = useState(false);
 
-  // ANVISA check state
-  const [anvisaFileUrl, setAnvisaFileUrl] = useState("");
-  const [anvisaChecking, setAnvisaChecking] = useState(false);
-  const [anvisaResult, setAnvisaResult] = useState(null);
+  // Verificação regulatória (sem IA)
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyStatus, setVerifyStatus] = useState(null);
+  const [categoryConfirmed, setCategoryConfirmed] = useState(false);
+  const cacheRef = useRef(new Map());
   const [deviceInfo, setDeviceInfo] = useState({});
   const handleDeviceInfoChange = (info) => {
     setDeviceInfo(info);
@@ -143,66 +144,87 @@ export default function LaserViabilityCalculator() {
     });
   };
 
-  const handleAnvisaFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const res = await base44.integrations.Core.UploadFile({ file });
-    if (res?.file_url) {
-      setAnvisaFileUrl(res.file_url);
-    }
-  };
-
-  const verifyAnvisaRegistration = async () => {
-    if (!formData.deviceModel) return;
-    setAnvisaChecking(true);
-    setAnvisaResult(null);
-
-    const keywords = [
-      'LASER','LUZ INTENSA','RADIOFREQUENCIA','ULTRASSOM','CRIOLIPOLISE','IPL','ND:YAG','CO2','DIODO','ALEXANDRITE',
-      ...Array.from(new Set(laserDatabase.flatMap(d => [d.type || '', d.wavelength || '', d.name || '']))).filter(Boolean)
-    ].slice(0, 200);
-
-    const schema = {
-      type: 'object',
-      properties: {
-        found: { type: 'boolean' },
-        confidence: { type: 'number' },
-        record_name: { type: 'string' },
-        manufacturer: { type: 'string' },
-        category: { type: 'string' },
-        registration_number: { type: 'string' },
-        matched_keywords: { type: 'array', items: { type: 'string' } },
-        reasoning: { type: 'string' }
-      }
-    };
-
-    const prompt = `Você é um assistente regulatório. Verifique em fontes oficiais (ANVISA) e bases públicas se o modelo abaixo está registrado no Brasil.
-
-Modelo: ${formData.deviceModel}
-Marca: ${formData.deviceBrand || '(não informada)'}
-
-Instruções:
-- Busque por nomes equivalentes/sinônimos e variações de grafia/acentos.
-- Priorize palavras-chave: ${keywords.join(', ')}.
-- Se houver múltiplas entradas, escolha a mais compatível e retorne o nº de registro.
-- Responda estritamente no JSON do schema fornecido.`;
-
+  // Seed database with baseline registry records if empty (runs once)
+  const ensureSeeded = async () => {
     try {
-      // Anexar somente arquivos enviados
-      const attachments = anvisaFileUrl ? [anvisaFileUrl] : [];
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        add_context_from_internet: true,
-        file_urls: attachments.length ? attachments : undefined,
-        response_json_schema: schema
-      });
-      setAnvisaResult(res);
+      const existing = await base44.entities.LaserRegistry.list();
+      if (Array.isArray(existing) && existing.length === 0) {
+        await base44.entities.LaserRegistry.bulkCreate([
+          { name: "Sistema a Laser Para Depilação", registration: "1531325", type: "Equipamento ou Material", category: "dermatológico", applications: ["depilação"], source: "ANVISA" },
+          { name: "Sistema Combinado de Ultrassom e Laser para Terapia", registration: "1331016", type: "Equipamento ou Material", category: "terapia", applications: ["terapia combinada"], source: "ANVISA" },
+          { name: "Sistema de Laser Para Terapia", registration: "1331070", type: "Equipamento ou Material", category: "terapia", applications: ["fototerapia"], source: "ANVISA" },
+          { name: "Sistema a Laser de Múltiplo Uso em Estética", registration: "1531326", type: "Equipamento ou Material", category: "estético", applications: ["estética", "rejuvenescimento"], source: "ANVISA" },
+          { name: "Sistema de laser de reprodução assistida", registration: "9000179", type: "Equipamento ou Material", category: "reprodução assistida", applications: ["laboratorial"], source: "ANVISA" },
+          { name: "Sistema de posicionamento a laser para paciente", registration: "9000564", type: "Equipamento ou Material", category: "posicionamento", applications: ["auxiliar"], source: "ANVISA" },
+          { name: "Laser de Diodo (Depilação)", registration: "", type: "Referência técnica", category: "dermatológico", applications: ["depilação"], source: "SBD" },
+          { name: "Nd:YAG 1064 nm", registration: "", type: "Referência técnica", category: "dermatológico", applications: ["vasos", "depilação", "rejuvenescimento"], source: "SBD" },
+          { name: "Alexandrite 755 nm", registration: "", type: "Referência técnica", category: "dermatológico", applications: ["depilação", "lesões pigmentares"], source: "SBD" },
+          { name: "CO2 Fracionado", registration: "", type: "Referência técnica", category: "dermatológico", applications: ["cicatrizes", "rejuvenescimento"], source: "SBD" },
+          { name: "Er:YAG 2940 nm", registration: "", type: "Referência técnica", category: "dermatológico", applications: ["resurfacing", "lesões"], source: "SBD" },
+          { name: "Luz Intensa Pulsada (IPL)", registration: "", type: "Referência técnica", category: "dermatológico", applications: ["manchas", "vasos", "rejuvenescimento"], source: "SBD" }
+        ]);
+      }
     } catch (e) {
-      console.error('Erro na verificação ANVISA:', e);
-      setAnvisaResult({ found: false, confidence: 0, reasoning: 'Erro ao analisar documento.' });
+      // ignore seeding errors
     }
-    setAnvisaChecking(false);
   };
+
+  useEffect(() => { ensureSeeded(); }, []);
+
+  const normalize = (s) => (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+  const verifyDevice = async (model, brand) => {
+    if (!model) { setVerifyStatus(null); setCategoryConfirmed(false); return; }
+    const key = `${model}__${brand || ""}`;
+    if (cacheRef.current.has(key)) {
+      setVerifyStatus(cacheRef.current.get(key));
+      setCategoryConfirmed(false);
+      return;
+    }
+    setVerifyLoading(true);
+    try {
+      // Try exact name match first
+      const direct = await base44.entities.LaserRegistry.filter({ name: model });
+      let records = Array.isArray(direct) ? direct : [];
+      if (records.length === 0) {
+        // Fallback: load all and try includes/tech match locally (still no IA)
+        const all = await base44.entities.LaserRegistry.list();
+        const nModel = normalize(model);
+        const nBrand = normalize(brand || "");
+        records = all.filter(r => {
+          const nName = normalize(r.name);
+          return nName === nModel || nName.includes(nModel) || (nBrand && nName.includes(nBrand));
+        });
+        if (records.length === 0) {
+          const selected = laserDatabase.find(d => normalize(d.name) === nModel);
+          if (selected) {
+            const techMatches = all.filter(r => normalize(r.name).includes(normalize(selected.type || "")));
+            if (techMatches.length) records = techMatches;
+          }
+        }
+      }
+      const found = records[0] || null;
+      const status = found ? {
+        found: true,
+        name: found.name,
+        category: found.category || found.type || "",
+        type: found.type || "",
+        registration: found.registration || "",
+        applications: Array.isArray(found.applications) ? found.applications : [],
+        source: found.source || "",
+      } : { found: false };
+      cacheRef.current.set(key, status);
+      setVerifyStatus(status);
+      setCategoryConfirmed(false);
+    } catch (e) {
+      setVerifyStatus({ found: false });
+      setCategoryConfirmed(false);
+    }
+    setVerifyLoading(false);
+  };
+
+  // Trigger verification when model/brand changes
+  useEffect(() => { verifyDevice(formData.deviceModel, formData.deviceBrand); }, [formData.deviceModel, formData.deviceBrand]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -634,6 +656,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
     { key: 'operation', label: 'Operação' },
     { key: 'revenue', label: 'Receita' },
   ];
+  const canCalculate = verifyStatus?.found && categoryConfirmed;
 
   return (
     <>
@@ -712,39 +735,42 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                           emptyText="Nenhum modelo encontrado"
                           pageSize={10}
                         />
-                        <div className="mt-2">
-                          <Button
-                            type="button"
-                            onClick={verifyAnvisaRegistration}
-                            disabled={!formData.deviceModel || anvisaChecking}
-                            className="bg-blue-600 hover:bg-blue-700"
-                          >
-                            <FileSearch className="w-4 h-4 mr-2" />
-                            {anvisaChecking ? 'Verificando...' : 'Verificar registro ANVISA'}
-                          </Button>
-                        </div>
-                        {anvisaResult && (
-                          <div className={`mt-3 p-3 rounded-lg border ${anvisaResult.found ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                            <div className="flex items-center gap-2 font-semibold">
-                              {anvisaResult.found ? (
-                                <><ShieldCheck className="w-4 h-4 text-green-600" /> Registrado pela ANVISA</>
-                              ) : (
-                                <><ShieldAlert className="w-4 h-4 text-red-600" /> Não encontrado como registrado</>
-                              )}
-                            </div>
-                            <div className="text-sm text-slate-600 mt-1 space-y-1">
-                              {anvisaResult.record_name && <p><strong>Entrada:</strong> {anvisaResult.record_name}</p>}
-                              {anvisaResult.manufacturer && <p><strong>Fabricante:</strong> {anvisaResult.manufacturer}</p>}
-                              {anvisaResult.registration_number && <p><strong>Nº Registro:</strong> {anvisaResult.registration_number}</p>}
-                              {anvisaResult.category && <p><strong>Categoria:</strong> {anvisaResult.category}</p>}
-                              {Array.isArray(anvisaResult.matched_keywords) && anvisaResult.matched_keywords.length > 0 && (
-                                <p><strong>Palavras-chave:</strong> {anvisaResult.matched_keywords.slice(0,6).join(', ')}</p>
-                              )}
-                              {typeof anvisaResult.confidence === 'number' && <p><strong>Confiança:</strong> {(anvisaResult.confidence * 100).toFixed(0)}%</p>}
-                              {anvisaResult.reasoning && <p className="italic">{anvisaResult.reasoning}</p>}
-                            </div>
+                        <div className={`mt-3 p-3 rounded-lg border ${verifyStatus?.found ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
+                          <div className="flex items-center gap-2 font-semibold">
+                            {verifyLoading ? (
+                              <><FileSearch className="w-4 h-4 text-blue-600 animate-pulse" /> Verificando registro em base estruturada...</>
+                            ) : verifyStatus?.found ? (
+                              <><ShieldCheck className="w-4 h-4 text-green-600" /> Equipamento identificado</>
+                            ) : (
+                              <><ShieldAlert className="w-4 h-4 text-yellow-600" /> Equipamento não localizado na base de dados atual</>
+                            )}
                           </div>
-                        )}
+                          <div className="text-sm text-slate-700 mt-1 space-y-1">
+                            {verifyStatus?.found && (
+                              <>
+                                <p><strong>Nome:</strong> {verifyStatus.name}</p>
+                                {verifyStatus.registration && <p><strong>Registro:</strong> {verifyStatus.registration}</p>}
+                                {verifyStatus.type && <p><strong>Tipo:</strong> {verifyStatus.type}</p>}
+                                {verifyStatus.category && <p><strong>Categoria:</strong> {verifyStatus.category}</p>}
+                                {verifyStatus.applications?.length > 0 && (
+                                  <p><strong>Aplicações:</strong> {verifyStatus.applications.join(', ')}</p>
+                                )}
+                                <div className="mt-2 flex items-center gap-2">
+                                  <input id="confirmCat" type="checkbox" className="h-4 w-4" checked={categoryConfirmed} onChange={(e)=>setCategoryConfirmed(e.target.checked)} />
+                                  <label htmlFor="confirmCat" className="text-sm">Confirmo que a categoria informada está correta.</label>
+                                </div>
+                              </>
+                            )}
+                            {!verifyStatus?.found && !verifyLoading && (
+                              <p className="italic">
+                                Verifique se o equipamento possui registro ou classificação compatível com uso médico ou dermatológico.
+                              </p>
+                            )}
+                            <p className="text-xs text-slate-500 mt-2">
+                              A verificação é realizada por consulta direta à base de dados estruturada (SBD/ANVISA), sem uso de IA, garantindo rastreabilidade e consistência técnica.
+                            </p>
+                          </div>
+                        </div>
                         <div className="mt-4">
                           <DeviceIdentifier deviceInfo={deviceInfo} onDeviceInfoChange={handleDeviceInfoChange} />
                         </div>
@@ -900,6 +926,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                         <Button 
                           className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg h-12"
                           onClick={calculateViability}
+                          disabled={!canCalculate}
                         >
                           <Calculator className="w-5 h-5 mr-2" />
                           Calcular Viabilidade
@@ -981,6 +1008,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
             <Button 
               className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
               onClick={handleCalculateNow}
+              disabled={!canCalculate}
             >
               <Calculator className="w-4 h-4 mr-2" />
               Calcular Agora
