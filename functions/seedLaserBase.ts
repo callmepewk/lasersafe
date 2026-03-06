@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
-// ---- Helpers ----
+// ===== Helpers =====
 const aliasManufacturer = (name) => {
   const n = (name || '').trim();
   const map = {
@@ -83,7 +83,7 @@ function mapTokenToTypeName(raw) {
 
 function chunk(arr, size) {
   const out = [];
-  for (let i=0;i<arr.length;i+=size) out.push(arr.slice(i, i+size));
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
 }
 
@@ -198,65 +198,66 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    // 1) Manufacturers upsert (bulk)
-    const desiredManRows = DATASET.map(([rawMan, rawCountry]) => [aliasManufacturer(rawMan), rawCountry]);
-    const uniqueMans = Array.from(new Map(desiredManRows.map(([n,c]) => [n, c || desiredCountries[n] || null])).entries());
+    let payload = {};
+    try { payload = await req.json(); } catch (_) {}
+    const setup = !!payload.setup;
+    const start = Number.isInteger(payload.start) ? payload.start : 0;
+    const end = Number.isInteger(payload.end) ? payload.end : DATASET.length;
+    const slice = DATASET.slice(Math.max(0, start), Math.min(end, DATASET.length));
 
+    // ===== Ensure Manufacturers =====
     let mans = await base44.asServiceRole.entities.Manufacturer.list();
     const manByName = new Map(mans.map(m => [m.name, m]));
+
+    const desiredManRows = slice.map(([rawMan, rawCountry]) => [aliasManufacturer(rawMan), rawCountry]);
+    // when setup mode, include all
+    const allDesiredRows = setup ? DATASET.map(([rm, rc]) => [aliasManufacturer(rm), rc]) : desiredManRows;
+
+    const uniqueMans = Array.from(new Map(allDesiredRows.map(([n,c]) => [n, c || desiredCountries[n] || null])).entries());
 
     const mansToCreate = uniqueMans
       .filter(([name]) => !manByName.has(name))
       .map(([name, country]) => ({ name, country: country || desiredCountries[name] || 'Internacional', verified_sbd: false, verified_anvisa: false }));
 
-    if (mansToCreate.length) {
-      // chunk to avoid rate limits
-      for (const part of chunk(mansToCreate, 50)) {
-        await base44.asServiceRole.entities.Manufacturer.bulkCreate(part);
-      }
-      mans = await base44.asServiceRole.entities.Manufacturer.list();
-    }
+    for (const part of chunk(mansToCreate, 40)) { if (part.length) await base44.asServiceRole.entities.Manufacturer.bulkCreate(part); }
+    mans = await base44.asServiceRole.entities.Manufacturer.list();
 
-    // Align countries on existing
     const currentByName = new Map(mans.map(m => [m.name, m]));
     const updates = [];
     for (const [name, country] of uniqueMans) {
       const desired = country || desiredCountries[name] || null;
       const cur = currentByName.get(name);
-      if (cur && desired && cur.country !== desired) {
-        updates.push({ id: cur.id, data: { country: desired } });
-      }
+      if (cur && desired && cur.country !== desired) updates.push({ id: cur.id, data: { country: desired } });
     }
-    for (const part of chunk(updates, 50)) {
-      await Promise.all(part.map(u => base44.asServiceRole.entities.Manufacturer.update(u.id, u.data)));
-    }
+    for (const part of chunk(updates, 40)) { await Promise.all(part.map(u => base44.asServiceRole.entities.Manufacturer.update(u.id, u.data))); }
 
-    // 2) Laser types ensure (bulk)
+    // ===== Ensure Laser Types =====
     let types = await base44.asServiceRole.entities.LaserType.list();
     const typeByName = new Map(types.map(t => [t.name, t]));
 
-    // derive needed types from dataset tokens
     const neededFromData = new Set();
-    for (const [, , , techStr] of DATASET) {
+    (setup ? DATASET : slice).forEach(([, , , techStr]) => {
       const tokens = (techStr || '').split('+').map(s => s.trim());
       tokens.forEach(tok => {
-        const mapped = mapTokenToTypeName(tok) || tok; // fall back to raw label for combos like 'Alexandrite'
+        const mapped = mapTokenToTypeName(tok) || tok;
         if (mapped) neededFromData.add(mapped);
       });
-    }
+    });
     TYPE_ALIASES.forEach(t => neededFromData.add(t));
 
     const typesToCreate = Array.from(neededFromData)
       .filter(n => !typeByName.has(n))
       .map(n => ({ name: n, wavelength: n.match(/\d+\s*nm/i)?.[0] || '', applications: [] }));
 
-    for (const part of chunk(typesToCreate, 80)) {
-      if (part.length) await base44.asServiceRole.entities.LaserType.bulkCreate(part);
-    }
+    for (const part of chunk(typesToCreate, 80)) { if (part.length) await base44.asServiceRole.entities.LaserType.bulkCreate(part); }
     types = await base44.asServiceRole.entities.LaserType.list();
     const typeNameToId = new Map(types.map(t => [t.name, t.id]));
 
-    // 3) Equipments upsert (bulk by manufacturer+model)
+    if (setup) {
+      return Response.json({ status: 'ok', message: 'Setup concluído (fabricantes e tipos assegurados)', manufacturers_created: mansToCreate.length, types_created: typesToCreate.length, totalDataset: DATASET.length });
+    }
+
+    // ===== Equipments upsert for slice =====
     const manNameToId = new Map((await base44.asServiceRole.entities.Manufacturer.list()).map(m => [m.name, m.id]));
 
     const allEquip = await base44.asServiceRole.entities.Equipment.list();
@@ -264,7 +265,7 @@ Deno.serve(async (req) => {
     const existingEqKeys = new Set((allEquip || []).map(e => eqKey(e.manufacturer_id, e.model)));
 
     const eqToCreate = [];
-    for (const [rawMan, rawCountry, model, techStr] of DATASET) {
+    for (const [rawMan, rawCountry, model, techStr] of slice) {
       const manName = aliasManufacturer(rawMan);
       const manId = manNameToId.get(manName);
       if (!manId || !model) continue;
@@ -281,21 +282,18 @@ Deno.serve(async (req) => {
         existingEqKeys.add(key);
       }
     }
-
-    for (const part of chunk(eqToCreate, 80)) {
-      if (part.length) await base44.asServiceRole.entities.Equipment.bulkCreate(part);
-    }
+    for (const part of chunk(eqToCreate, 80)) { if (part.length) await base44.asServiceRole.entities.Equipment.bulkCreate(part); }
 
     // Refresh equipments map
     const equipments = await base44.asServiceRole.entities.Equipment.list();
     const eqByKey = new Map(equipments.map(e => [eqKey(e.manufacturer_id, e.model), e]));
 
-    // 4) EquipmentType links (bulk)
+    // ===== EquipmentType links for slice =====
     const existingLinks = await base44.asServiceRole.entities.EquipmentType.list();
     const existingLinkSet = new Set((existingLinks || []).map(l => `${l.equipment_id}__${l.laser_type_id}`));
 
     const linksToCreate = [];
-    for (const [rawMan, , model, techStr] of DATASET) {
+    for (const [rawMan, , model, techStr] of slice) {
       const manName = aliasManufacturer(rawMan);
       const manId = manNameToId.get(manName);
       const eq = eqByKey.get(eqKey(manId, model));
@@ -317,16 +315,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    for (const part of chunk(linksToCreate, 100)) {
-      if (part.length) await base44.asServiceRole.entities.EquipmentType.bulkCreate(part);
-    }
+    for (const part of chunk(linksToCreate, 100)) { if (part.length) await base44.asServiceRole.entities.EquipmentType.bulkCreate(part); }
 
-    return Response.json({
-      status: 'ok',
-      created_manufacturers: mansToCreate ? mansToCreate.length : 0,
-      created_equipments: eqToCreate.length,
-      created_links: linksToCreate.length,
-    });
+    return Response.json({ status: 'ok', created_equipments: eqToCreate.length, created_links: linksToCreate.length, slice: { start, end } });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
