@@ -220,7 +220,7 @@ export default function LaserViabilityCalculator() {
       };
       const toUpdate = (mans || []).filter(m => desiredCountries[m.name] && m.country !== desiredCountries[m.name]);
       if (toUpdate.length) {
-        await Promise.all(toUpdate.map(m => base44.entities.Manufacturer.update(m.id, { country: desiredCountries[m.name] })));
+        for (const m of toUpdate) { await base44.entities.Manufacturer.update(m.id, { country: desiredCountries[m.name] }); }
         mans = await base44.entities.Manufacturer.list();
       }
       const manByName = Object.fromEntries(mans.map(m => [m.name, m]));
@@ -254,7 +254,7 @@ export default function LaserViabilityCalculator() {
         "Laser fracionado",
         "Laser híbrido"
       ];
-      const existingTypeNames = new Set(types.map(t => t.name));
+      const existingTypeNames = new Set((types || []).map(t => t.name));
       const missing = extraTypes.filter(n => !existingTypeNames.has(n));
       if (missing.length) {
         await base44.entities.LaserType.bulkCreate(missing.map(n => ({ name: n, wavelength: n.includes("nm") ? n.match(/\d+\s*nm/i)?.[0] || "" : "", applications: [] })));
@@ -568,16 +568,24 @@ export default function LaserViabilityCalculator() {
         eqs = await base44.entities.Equipment.list();
       } catch(_) {}
 
-      // Build indexes
+      // Build indexes (support multi-tech via EquipmentType join)
       const byManufacturer = {};
       const byTech = {};
+      let linksAll = [];
+      try { linksAll = await base44.entities.EquipmentType.list(); } catch(_) { linksAll = []; }
+      const mapTypes = {};
+      (Array.isArray(linksAll)?linksAll:[]).forEach(l => {
+        if (!mapTypes[l.equipment_id]) mapTypes[l.equipment_id] = [];
+        mapTypes[l.equipment_id].push(l.laser_type_id);
+      });
       eqs.forEach(e => {
+        const typeIds = mapTypes[e.id] || (e.laser_type_id ? [e.laser_type_id] : []);
         if (!byManufacturer[e.manufacturer_id]) byManufacturer[e.manufacturer_id] = [];
-        byManufacturer[e.manufacturer_id].push({ model: e.model, typeId: e.laser_type_id, registro: e.registro_anvisa, risk: e.risco_regulatorio });
-        if (e.laser_type_id) {
-          if (!byTech[e.laser_type_id]) byTech[e.laser_type_id] = [];
-          byTech[e.laser_type_id].push({ model: e.model, manufacturerId: e.manufacturer_id });
-        }
+        byManufacturer[e.manufacturer_id].push({ model: e.model, typeIds, registro: e.registro_anvisa, risk: e.risco_regulatorio });
+        typeIds.forEach(tid => {
+          if (!byTech[tid]) byTech[tid] = [];
+          byTech[tid].push({ model: e.model, manufacturerId: e.manufacturer_id });
+        });
       });
 
       setManufacturers(mans);
@@ -608,11 +616,26 @@ export default function LaserViabilityCalculator() {
         record = allM.find(e => normalize(e.model) === nModel || normalize(e.model).includes(nModel));
       }
       if (record) {
+        let techNames = [];
+        try {
+          const links = await base44.entities.EquipmentType.filter({ equipment_id: record.id });
+          const typeIds = Array.isArray(links) ? links.map(l => l.laser_type_id).filter(Boolean) : [];
+          techNames = typeIds.map(id => laserTypes.find(t => t.id === id)?.name).filter(Boolean);
+          if (techNames.length === 0 && record.laser_type_id) {
+            const single = laserTypes.find(t => t.id === record.laser_type_id)?.name;
+            if (single) techNames = [single];
+          }
+        } catch(_) {
+          if (record.laser_type_id) {
+            const single = laserTypes.find(t => t.id === record.laser_type_id)?.name;
+            if (single) techNames = [single];
+          }
+        }
         const status = {
           found: true,
           manufacturer: manufacturers.find(m => m.id === manufacturerId)?.name || "",
           model: record.model,
-          technology: laserTypes.find(t => t.id === record.laser_type_id)?.name || "",
+          technology: techNames.join(' + '),
           registration: record.registro_anvisa || "",
           regulatory_status: record.status_regulatorio || "",
           risk: record.risco_regulatorio || "medio",
@@ -684,7 +707,7 @@ export default function LaserViabilityCalculator() {
   };
 
   // Trigger verification when model/manufacturer changes
-  useEffect(() => { verifyEquipment(formData.deviceModel, selectedManufacturerId); }, [formData.deviceModel, selectedManufacturerId]);
+  useEffect(() => { verifyEquipment(formData.deviceModel, selectedManufacturerId); }, [formData.deviceModel, selectedManufacturerId]); // uses join table when available
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -1120,7 +1143,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
   // Sugestões combinadas: Tecnologias expostas + todos os modelos do banco (prioriza nacionais)
   const brazilianManufacturers = ["Ibramed","HTM","KLD","MMOptics","DGM","Tone Derm"];
   const techOptions = laserTechOptions.map(t => ({ value: t.value, label: `${t.label} [Tecnologia]` }));
-  const modelOptions = laserDatabase.map(d => ({ value: d.name, label: `${d.name} (${d.manufacturer})`, m: d.manufacturer || "" }));
+  const modelOptions = laserDatabase.map(d => ({ value: d.name, label: `${d.name} (${d.manufacturer})`, m: d.manufacturer || "" })); // legacy suggester (mantido)
   const modelOptionsSorted = modelOptions.sort((a,b) => {
     const pa = brazilianManufacturers.some(m => a.m?.toLowerCase().includes(m.toLowerCase())) ? 0 : 1;
     const pb = brazilianManufacturers.some(m => b.m?.toLowerCase().includes(m.toLowerCase())) ? 0 : 1;
@@ -1134,7 +1157,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
     { key: 'operation', label: 'Operação' },
     { key: 'revenue', label: 'Receita' },
   ];
-  const canCalculate = verifyStatus?.found && categoryConfirmed;
+  const canCalculate = verifyStatus?.found && categoryConfirmed; // requires multi-tech verification as above
 
   return (
     <>
@@ -1227,7 +1250,7 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
                           <Label htmlFor="deviceModel">Modelo do Laser</Label>
                           <Combobox
                             options={(equipmentIndex.byManufacturer[selectedManufacturerId] || [])
-                              .filter(it => !selectedLaserTypeId || it.typeId === selectedLaserTypeId)
+                              .filter(it => !selectedLaserTypeId || (it.typeIds || []).includes(selectedLaserTypeId))
                               .map(it => ({ value: it.model, label: it.model }))}
                             value={formData.deviceModel}
                             onChange={(val) => { handleInputChange("deviceModel", val); }}
