@@ -75,6 +75,7 @@ export default function LaserViabilityCalculator() {
   const [equipmentIndex, setEquipmentIndex] = useState({ byManufacturer: {}, byTech: {} });
   const [selectedLaserTypeId, setSelectedLaserTypeId] = useState("");
   const [selectedManufacturerId, setSelectedManufacturerId] = useState("");
+  const [allModels, setAllModels] = useState([]);
   const handleDeviceInfoChange = (info) => {
     setDeviceInfo(info);
     if (info.model) handleInputChange("deviceModel", info.model);
@@ -617,6 +618,10 @@ export default function LaserViabilityCalculator() {
       setManufacturers(mans);
       setLaserTypes(types);
       setEquipmentIndex({ byManufacturer, byTech });
+      try {
+        const uniq = Array.from(new Set((Array.isArray(eqs)?eqs:[]).map(e => e.model).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+        setAllModels(uniq);
+      } catch (_) { setAllModels([]); }
     } catch (e) {
       // ignore
     }
@@ -735,15 +740,7 @@ export default function LaserViabilityCalculator() {
   // Trigger verification when model/manufacturer changes
   useEffect(() => { verifyEquipment(formData.deviceModel, selectedManufacturerId); }, [formData.deviceModel, selectedManufacturerId]); // uses join table when available
 
-  // Reset fabricante/modelo quando a tecnologia muda (filtra fabricantes por tecnologia)
-  useEffect(() => {
-    const allowedSet = selectedLaserTypeId ? new Set((equipmentIndex.byTech[selectedLaserTypeId] || []).map(it => it.manufacturerId)) : null;
-    if (allowedSet && selectedManufacturerId && !allowedSet.has(selectedManufacturerId)) {
-      setSelectedManufacturerId("");
-      handleInputChange("deviceBrand", "");
-      handleInputChange("deviceModel", "");
-    }
-  }, [selectedLaserTypeId, equipmentIndex.byTech]);
+
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -1194,9 +1191,6 @@ Este é um email automático. Para mais informações, acesse: https://lasercode
     { key: 'revenue', label: 'Receita' },
   ];
   const canCalculate = verifyStatus?.found && categoryConfirmed; // requires multi-tech verification as above
-const filteredManufacturers = selectedLaserTypeId
-  ? manufacturers.filter(m => (equipmentIndex.byTech[selectedLaserTypeId] || []).some(it => it.manufacturerId === m.id))
-  : manufacturers;
 
   return (
     <>
@@ -1272,14 +1266,9 @@ const filteredManufacturers = selectedLaserTypeId
                         <div className="mt-3">
                           <Label htmlFor="manufacturer">Fabricante</Label>
                           <Combobox
-                            options={filteredManufacturers.map(m => ({ value: m.id, label: m.name }))}
+                            options={manufacturers.map(m => ({ value: m.id, label: m.name }))}
                             value={selectedManufacturerId}
-                            onChange={(val) => {
-                              setSelectedManufacturerId(val);
-                              const m = manufacturers.find(x => x.id === val);
-                              handleInputChange("deviceBrand", m?.name || "");
-                              handleInputChange("deviceModel", "");
-                            }}
+                            onChange={(val) => { setSelectedManufacturerId(val); }}
                             placeholder="Selecione o fabricante"
                             emptyText="Nenhum fabricante cadastrado"
                             pageSize={10}
@@ -1288,9 +1277,7 @@ const filteredManufacturers = selectedLaserTypeId
                         <div className="mt-3">
                           <Label htmlFor="deviceModel">Modelo do Laser</Label>
                           <Combobox
-                            options={(equipmentIndex.byManufacturer[selectedManufacturerId] || [])
-                              .filter(it => !selectedLaserTypeId || (it.typeIds || []).includes(selectedLaserTypeId))
-                              .map(it => ({ value: it.model, label: it.model }))}
+                            options={allModels.map(m => ({ value: m, label: m }))}
                             value={formData.deviceModel}
                             onChange={(val) => { handleInputChange("deviceModel", val); }}
                             placeholder="Selecione o modelo..."
