@@ -444,6 +444,13 @@ Seja EXTREMAMENTE técnico, preciso e forneça informações que um profissional
         <StepIndicator />
       </div>
 
+      <Alert className="bg-blue-50 border-blue-200 text-blue-900 mb-6">
+        <AlertTitle>Aviso de Conformidade (ANVISA)</AlertTitle>
+        <AlertDescription>
+          Este sistema utiliza suporte à decisão clínica (Clinical Decision Support – CDS). As sugestões de parâmetros são apenas auxiliares e não substituem a avaliação clínica do profissional responsável, conforme diretrizes regulatórias da ANVISA.
+        </AlertDescription>
+      </Alert>
+
       {currentStep === 1 && (
         <div className="print:hidden">
             <PatientSelectionStep 

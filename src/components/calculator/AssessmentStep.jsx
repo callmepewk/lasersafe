@@ -178,15 +178,30 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
   const [aiSuggestions, setAiSuggestions] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
 
+  const hasRequiredClinicalInfo = Boolean(
+    (assessment.laser_type && (assessment.laser_type !== 'Outro' || assessment.other_laser_type)) &&
+    (assessment.procedure_type && (assessment.procedure_type !== 'Outro' || assessment.other_procedure_type)) &&
+    assessment.region &&
+    assessment.phototype &&
+    assessment.target_type
+  );
+
+  const isFractional = /fracionad|scanner|fraction/i.test(assessment.laser_type || '');
+
   useEffect(() => { (async () => { try { const u = await base44.auth.me(); setCurrentUser(u); } catch(e){} })(); }, []);
 
   const suggestWithAI = async () => {
+    if (!hasRequiredClinicalInfo) return;
     setAiLoading(true);
     try {
-      const prompt = `Você é um especialista em lasers dermatológicos. Gere parâmetros iniciais seguros e eficazes com base nos dados abaixo.
-  Dados do caso:
-  ${JSON.stringify({
+      const device = assessment.device_info || {};
+      const isFrac = /fracionad|scanner|fraction/i.test(assessment.laser_type || '');
+      const prompt = `Você é um especialista em lasers dermatológicos. Gere parâmetros iniciais SEGUROS e ESPECÍFICOS AO EQUIPAMENTO, obedecendo limites do fabricante.
+
+DADOS DO CASO:
+${JSON.stringify({
   procedure_type: assessment.procedure_type,
+  other_procedure_type: assessment.other_procedure_type,
   region: assessment.region,
   phototype: assessment.phototype,
   skin_color: assessment.skin_color,
@@ -196,10 +211,25 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
   aggressiveness_level: assessment.aggressiveness_level,
   depth_level: assessment.depth_level,
   fluence_unit: assessment.fluence_unit
-  })}
-  Responda em JSON.`;
+}, null, 2)}
+
+ESPECIFICAÇÕES DO EQUIPAMENTO SELECIONADO:
+${JSON.stringify({
+  brand: device.brand,
+  model: device.model,
+  type: device.type,
+  wavelength: device.wavelength,
+  description: device.description
+}, null, 2)}
+
+INSTRUÇÕES:
+- Siga os limites e modos de emissão do equipamento (fluência e pulso dentro das faixas do fabricante).
+- Se necessário, use conhecimento público para faixas típicas do modelo/marca.
+- Se ${isFrac ? 'SIM' : 'NÃO'} for fracionado/scanner, considere configurações fracionadas, mas retorne apenas os campos do schema solicitado.
+Responda em JSON.`;
       const res = await base44.integrations.Core.InvokeLLM({
         prompt,
+        add_context_from_internet: true,
         response_json_schema: {
           type: 'object',
           properties: {
@@ -504,6 +534,7 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
               </div>
 
               {/* PARÂMETROS AVANÇADOS DE LASER FRACIONADO */}
+              {isFractional && (
               <div className="border-t pt-4">
                 <h4 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
                   <Settings className="w-5 h-5 text-purple-600" />
@@ -670,11 +701,16 @@ export default function AssessmentStep({ patient, onAssessmentComplete, onBack, 
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-3">
-              <Button type="button" onClick={suggestWithAI} disabled={aiLoading} className="bg-indigo-600 hover:bg-indigo-700">
+              <Button type="button" onClick={suggestWithAI} disabled={!hasRequiredClinicalInfo || aiLoading} className="bg-indigo-600 hover:bg-indigo-700">
                 {aiLoading ? 'Gerando...' : 'Sugerir com IA'}
               </Button>
               <p className="text-sm text-indigo-800">As sugestões são auxiliares. A decisão final é do profissional.</p>
             </div>
+            {!hasRequiredClinicalInfo && (
+              <p className="text-sm text-slate-700 bg-slate-100 border border-slate-200 rounded-md px-3 py-2">
+                Preencha todas as informações clínicas para habilitar a sugestão de parâmetros.
+              </p>
+            )}
             {aiSuggestions && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 <div className="p-3 bg-white rounded border"><p className="text-xs text-slate-500">Fluência</p><p className="font-bold">{aiSuggestions.fluence}</p></div>

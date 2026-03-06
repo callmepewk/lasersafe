@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Upload, Camera, X, Loader2, CheckCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { laserDatabase } from "./laserDatabase";
@@ -12,6 +14,8 @@ export default function DeviceIdentifier({ deviceInfo, onDeviceInfoChange }) {
   const [identifying, setIdentifying] = useState(false);
   const [devicePhoto, setDevicePhoto] = useState(deviceInfo?.photo || null);
   const [identificationSuccess, setIdentificationSuccess] = useState(false);
+  const [openCatalog, setOpenCatalog] = useState(false);
+  const [search, setSearch] = useState("");
 
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -183,6 +187,41 @@ Retorne apenas o JSON.`,
             <p className="text-sm text-purple-700">Identificando aparelho com IA...</p>
           </div>
         )}
+
+        {/* Seleção por Catálogo */}
+        <div className="mb-4">
+          <Dialog open={openCatalog} onOpenChange={setOpenCatalog}>
+            <DialogTrigger asChild>
+              <Button type="button" variant="outline">Selecionar laser no catálogo</Button>
+            </DialogTrigger>
+            <DialogContent className="w-[95vw] sm:max-w-xl max-h-[80vh] overflow-hidden">
+              <DialogHeader>
+                <DialogTitle>Selecionar Laser</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <Input placeholder="Buscar por nome, fabricante, tipo..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                <div className="border rounded-md h-[55vh] overflow-y-auto p-2 bg-white/60">
+                  {laserDatabase
+                    .filter(l => (
+                      (l.name?.toLowerCase()||"").includes(search.toLowerCase()) ||
+                      (l.manufacturer?.toLowerCase()||"").includes(search.toLowerCase()) ||
+                      (l.type?.toLowerCase()||"").includes(search.toLowerCase())
+                    ))
+                    .map((l, idx) => (
+                      <button key={idx} className="w-full text-left p-3 rounded hover:bg-slate-100 border-b last:border-b-0"
+                        onClick={() => {
+                          onDeviceInfoChange({ brand: l.manufacturer, model: l.name, type: l.type, wavelength: l.wavelength, description: `${l.type} - ${l.wavelength}` });
+                          setOpenCatalog(false);
+                        }}>
+                        <p className="font-medium text-slate-900">{l.name}</p>
+                        <p className="text-xs text-slate-600">{l.manufacturer} • {l.wavelength} • {l.type}</p>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
 
         {/* Campos de Informação do Aparelho */}
         {devicePhoto && !identifying && (
