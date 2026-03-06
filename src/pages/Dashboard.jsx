@@ -142,10 +142,7 @@ export default function Dashboard() {
         onAccept={handleAcceptTerms}
       />
 
-      {/* Calculadora de Viabilidade (prioridade no mobile) */}
-      <div className="mb-6">
-        <LaserViabilityCalculator />
-      </div>
+
       {/* Promo Card - Calculadora Inteligente */}
       <div className="sticky top-0 z-30 mb-4">
         <div className="rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white shadow-xl ring-1 ring-black/5 flex flex-col sm:flex-row items-start sm:items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -170,6 +167,11 @@ export default function Dashboard() {
         <p className="mt-2 text-xs text-slate-600">
           Ferramenta desenvolvida para auxiliar profissionais na definição de parâmetros técnicos de lasers dermatológicos com base em variáveis clínicas.
         </p>
+
+        {/* Calculadora de Viabilidade (reposicionada abaixo da Calculadora Inteligente) */}
+        <div className="mb-6">
+          <LaserViabilityCalculator />
+        </div>
       </div>
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 md:mb-8 gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
