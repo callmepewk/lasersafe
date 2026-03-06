@@ -32,6 +32,7 @@ export default function PrescriptionForm({ prescription, onSave, onCancel }) {
     signature_data: prescription?.signature_data || "",
     status: prescription?.status || "rascunho"
   });
+  const [price, setPrice] = useState("");
 
   useEffect(() => {
     loadData();
@@ -235,7 +236,7 @@ Ordene por relevância para a busca.`,
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-3 gap-3">
         <div>
           <Label htmlFor="date">Data da Prescrição</Label>
           <Input
@@ -245,8 +246,18 @@ Ordene por relevância para a busca.`,
             onChange={(e) => setFormData({ ...formData, prescription_date: e.target.value })}
           />
         </div>
-
-
+        <div>
+          <Label htmlFor="price">Valor (R$)</Label>
+          <Input
+            id="price"
+            type="number"
+            step="0.01"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder="Opcional"
+          />
+          <p className="text-xs text-slate-500 mt-1">Campo informativo, não será salvo.</p>
+        </div>
       </div>
 
       <div>
