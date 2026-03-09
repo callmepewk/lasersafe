@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import PageBlockChecker from '../components/system/PageBlockChecker';
+import TutorialVideoHeader from '../components/tutorial/TutorialVideoHeader';
 import {
     GraduationCap,
     LayoutDashboard,
@@ -147,6 +148,10 @@ export default function Tutorial() {
                     <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight truncate">Tutorial Completo</h1>
                     <p className="text-slate-600 text-sm md:text-lg truncate">Aprenda a usar todas as funcionalidades</p>
                 </div>
+            </div>
+
+            <div className="mb-6 md:mb-8">
+                <TutorialVideoHeader />
             </div>
 
             <div className="space-y-4 md:space-y-6">
