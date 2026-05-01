@@ -60,11 +60,17 @@ export default function CalculationResults({ patient, professional, assessment, 
       delete cleanedAdjusted.injury_risk;
       delete cleanedAdjusted.normalized_target_type;
       delete cleanedAdjusted.model_correction_factor;
+      delete cleanedAdjusted.k_melanina;
+      delete cleanedAdjusted.correction_factors;
+      delete cleanedAdjusted.optical_thermal_model;
       if (cleanedOriginal) {
         delete cleanedOriginal.advancedCalculation;
         delete cleanedOriginal.injury_risk;
         delete cleanedOriginal.normalized_target_type;
         delete cleanedOriginal.model_correction_factor;
+        delete cleanedOriginal.k_melanina;
+        delete cleanedOriginal.correction_factors;
+        delete cleanedOriginal.optical_thermal_model;
       }
       await onSaveCalculation(
           cleanedAdjusted,
@@ -232,7 +238,10 @@ export default function CalculationResults({ patient, professional, assessment, 
           </CardHeader>
           <CardContent>
             <p className="text-sm text-slate-700">
-              Risco estimado: <strong className="capitalize">{adjustedParams.injury_risk.level}</strong> (score {adjustedParams.injury_risk.score}).
+              Risco estimado: <strong className="capitalize">{adjustedParams.injury_risk.level}</strong> (score {adjustedParams.injury_risk.score} / probabilidade {adjustedParams.injury_risk.probability}%).
+            </p>
+            <p className="text-xs text-slate-500 mt-2">
+              Resposta tecidual prevista: {adjustedParams.injury_risk.tissue_response}.
             </p>
           </CardContent>
         </Card>

@@ -193,6 +193,15 @@ PARÂMETROS BÁSICOS JÁ CALCULADOS:
 - Spot Size: ${basicResults.spot_size} mm
 - Frequência: ${basicResults.frequency} Hz
 - Resfriamento: ${basicResults.cooling_intensity}/5
+- Profundidade de Penetração: ${basicResults.optical_thermal_model?.penetration_depth_mm || 'N/A'} mm
+- Energia Absorvida: ${basicResults.optical_thermal_model?.absorbed_energy_density || 'N/A'}
+- ΔT estimado: ${basicResults.optical_thermal_model?.delta_temperature_c || 'N/A'} °C
+- TRT: ${basicResults.optical_thermal_model?.thermal_relaxation_time_s || 'N/A'} s
+- Razão pulso/TRT: ${basicResults.optical_thermal_model?.pulse_trt_ratio || 'N/A'}
+- Dano Arrhenius: ${basicResults.optical_thermal_model?.arrhenius_damage || 'N/A'}
+- Seletividade cromóforo: ${basicResults.optical_thermal_model?.chromophore_selectivity || 'N/A'}
+- Energia total entregue: ${basicResults.optical_thermal_model?.total_energy_delivered_j || 'N/A'} J
+- Overlap estimado: ${basicResults.optical_thermal_model?.overlap_ratio || 'N/A'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
