@@ -57,7 +57,15 @@ export default function CalculationResults({ patient, professional, assessment, 
       const cleanedAdjusted = { ...adjustedParams };
       const cleanedOriginal = isAdjusted ? { ...originalParams } : null;
       delete cleanedAdjusted.advancedCalculation;
-      if (cleanedOriginal) delete cleanedOriginal.advancedCalculation;
+      delete cleanedAdjusted.injury_risk;
+      delete cleanedAdjusted.normalized_target_type;
+      delete cleanedAdjusted.model_correction_factor;
+      if (cleanedOriginal) {
+        delete cleanedOriginal.advancedCalculation;
+        delete cleanedOriginal.injury_risk;
+        delete cleanedOriginal.normalized_target_type;
+        delete cleanedOriginal.model_correction_factor;
+      }
       await onSaveCalculation(
           cleanedAdjusted,
           isAdjusted ? cleanedOriginal : null,
@@ -193,7 +201,7 @@ export default function CalculationResults({ patient, professional, assessment, 
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">Alvo:</span>
-              <span className="font-semibold capitalize">{assessment.target_type?.replace('_', ' ')}</span>
+              <span className="font-semibold capitalize">{(results.normalized_target_type || assessment.target_type)?.replace(/_/g, ' ')}</span>
             </div>
           </CardContent>
         </Card>
@@ -214,6 +222,21 @@ export default function CalculationResults({ patient, professional, assessment, 
       <InteractiveExplanation assessment={assessment} params={adjustedParams} />
 
       {/* Manchester Protocol Safety Alert */}
+      {adjustedParams?.injury_risk && (
+        <Card className={`print:shadow-none print:border-none ${adjustedParams.injury_risk.level === 'alto' ? 'bg-red-50 border-red-200' : adjustedParams.injury_risk.level === 'moderado' ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <AlertTriangle className="w-5 h-5" />
+              Predição de risco tecidual
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-slate-700">
+              Risco estimado: <strong className="capitalize">{adjustedParams.injury_risk.level}</strong> (score {adjustedParams.injury_risk.score}).
+            </p>
+          </CardContent>
+        </Card>
+      )}
       <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 print:shadow-none print:border-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-green-900 text-lg">

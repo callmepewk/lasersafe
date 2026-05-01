@@ -15,6 +15,7 @@ import CalculationResults from "../components/calculator/CalculationResults";
 import { checkAndResetMonthlyUsage } from "../components/utils/usageReset";
 import { useTranslation } from "@/components/i18n/TranslationContext";
 import PageBlockChecker from "../components/system/PageBlockChecker";
+import { calculateLaserParametersWithModel } from "../components/calculator/laserMathEngine";
 import {
   Alert,
   AlertDescription,
@@ -149,62 +150,7 @@ export default function Calculator() {
   };
 
   const calculateLaserParameters = async (data) => {
-    // Cálculo do Fator de Segurança baseado no Fototipo
-    const safetyFactors = {
-      'I': 0.6, 'II': 0.7, 'III': 0.8, 'IV': 0.9, 'V': 1.0, 'VI': 1.1
-    };
-    const safety_factor = safetyFactors[data.phototype] || 0.8;
-
-    // Modulador de Intensidade baseado no nível de agressividade
-    const intensityModulators = {
-      'conservador': 0.8,
-      'moderado': 1.0,
-      'agressivo': 1.2
-    };
-    const intensity_modulator = intensityModulators[data.aggressiveness_level] || 1.0;
-
-    // Parâmetro chave baseado no tipo de alvo
-    let key_parameter = "";
-    let base_fluence = 0;
-    let base_pulse = 0;
-    
-    switch (data.target_type) {
-      case 'melanina_epidérmica':
-        key_parameter = "Fluência";
-        base_fluence = 20; // J/cm²
-        base_pulse = 3; // ms
-        break;
-      case 'vascular':
-        key_parameter = "Duração de Pulso";
-        base_fluence = 15;
-        base_pulse = 10;
-        break;
-      case 'colágeno_profundo':
-        key_parameter = "Profundidade";
-        base_fluence = 25;
-        base_pulse = 15;
-        break;
-      default:
-        base_fluence = 18;
-        base_pulse = 5;
-    }
-
-    const fluence_num = Math.round((base_fluence * intensity_modulator) / safety_factor);
-    const pulse_duration_num = Math.round((base_pulse * intensity_modulator) / safety_factor);
-    
-    const spot_size_num = data.phototype === 'I' || data.phototype === 'II' ? 8 : 10;
-    const frequency_num = data.skin_sensitivity === 'muito_sensível' ? 1 : 2;
-
-    return {
-      safety_factor,
-      intensity_modulator,
-      key_parameter,
-      fluence: fluence_num.toString(),
-      pulse_duration: pulse_duration_num.toString(),
-      spot_size: spot_size_num.toString(),
-      frequency: frequency_num.toString(),
-      cooling_intensity: data.cooling_intensity
-    };
+    return calculateLaserParametersWithModel(data);
   };
 
   const calculateAdvancedParameters = async (assessmentData, basicResults) => {

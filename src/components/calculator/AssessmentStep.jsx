@@ -13,6 +13,7 @@ import DeviceIdentifier from "./DeviceIdentifier";
 import { targetTypes } from "./laserDatabase";
 import { laserTechOptions } from "./laserTechOptions";
 import { base44 } from "@/api/base44Client";
+import { normalizeTargetType } from "./targetNormalization";
 
 const calculateAge = (birthDate) => {
   if (!birthDate) return null;
@@ -297,12 +298,12 @@ Responda em JSON.`;
          }
        });
 
-       let target = response.target_type;
+       let target = normalizeTargetType(response.target_type);
        const allowed = allowedTargetValues;
        if (!allowed.includes(target || '')) {
          const lc = (target || '').toLowerCase();
          const byValue = targetTypes.find(t => t.value.toLowerCase() === lc || t.value.toLowerCase().includes(lc) || lc.includes(t.value.toLowerCase()));
-         const byLabel = targetTypes.find(t => (t.label || '').toLowerCase().includes(lc));
+         const byLabel = targetTypes.find(t => normalizeTargetType(t.label || '') === lc || (t.label || '').toLowerCase().includes(lc));
          const matched = byValue || byLabel;
          if (matched) target = matched.value;
        }
@@ -320,7 +321,8 @@ Responda em JSON.`;
 
    const handleInputChange = (field, value) => {
     setAssessment(prev => {
-      const updated = { ...prev, [field]: value };
+      const normalizedValue = field === 'target_type' ? normalizeTargetType(value) : value;
+      const updated = { ...prev, [field]: normalizedValue };
 
       // Se mudar a tecnologia, zera ponteira
       if (field === 'laser_type') {
