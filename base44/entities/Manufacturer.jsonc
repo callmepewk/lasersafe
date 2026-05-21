@@ -1,0 +1,49 @@
+{
+  "name": "Manufacturer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome do fabricante"
+    },
+    "country": {
+      "type": "string",
+      "description": "Pa\u00eds de origem"
+    },
+    "website": {
+      "type": "string",
+      "description": "Site oficial"
+    },
+    "verified_sbd": {
+      "type": "boolean",
+      "default": false,
+      "description": "Reconhecido/Refer\u00eancia SBD"
+    },
+    "verified_anvisa": {
+      "type": "boolean",
+      "default": false,
+      "description": "Possui registros ANVISA conhecidos"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
