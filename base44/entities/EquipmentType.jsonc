@@ -1,0 +1,36 @@
+{
+  "name": "EquipmentType",
+  "type": "object",
+  "properties": {
+    "equipment_id": {
+      "type": "string",
+      "description": "ID do equipamento"
+    },
+    "laser_type_id": {
+      "type": "string",
+      "description": "ID do tipo de laser"
+    }
+  },
+  "required": [
+    "equipment_id",
+    "laser_type_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
