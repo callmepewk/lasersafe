@@ -1,0 +1,74 @@
+{
+  "name": "Banner",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "T\u00edtulo do banner"
+    },
+    "description": {
+      "type": "string",
+      "description": "Descri\u00e7\u00e3o do banner"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL da imagem do banner"
+    },
+    "link_url": {
+      "type": "string",
+      "description": "URL de redirecionamento ao clicar"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o banner est\u00e1 ativo"
+    },
+    "show_as_popup": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se deve aparecer como popup na tela inicial"
+    },
+    "show_in_dashboard": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se deve aparecer no dashboard"
+    },
+    "priority": {
+      "type": "number",
+      "default": 0,
+      "description": "Prioridade de exibi\u00e7\u00e3o (maior = primeiro)"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de in\u00edcio de exibi\u00e7\u00e3o"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de fim de exibi\u00e7\u00e3o"
+    }
+  },
+  "required": [
+    "title",
+    "image_url"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
