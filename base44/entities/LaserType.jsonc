@@ -1,0 +1,42 @@
+{
+  "name": "LaserType",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Tecnologia do laser (ex: CO2 Fracionado, Nd:YAG 1064nm)"
+    },
+    "wavelength": {
+      "type": "string",
+      "description": "Comprimento de onda (quando aplic\u00e1vel)"
+    },
+    "applications": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Aplica\u00e7\u00f5es dermatol\u00f3gicas"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
