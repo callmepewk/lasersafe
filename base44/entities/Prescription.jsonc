@@ -1,0 +1,134 @@
+{
+  "name": "Prescription",
+  "type": "object",
+  "properties": {
+    "patient_id": {
+      "type": "string",
+      "description": "ID do paciente"
+    },
+    "patient_name": {
+      "type": "string",
+      "description": "Nome do paciente (quando n\u00e3o vinculado ao cadastro)"
+    },
+    "professional_id": {
+      "type": "string",
+      "description": "ID do profissional"
+    },
+    "professional_name": {
+      "type": "string",
+      "description": "Nome do profissional (quando n\u00e3o vinculado ao cadastro)"
+    },
+    "calculation_id": {
+      "type": "string",
+      "description": "ID do c\u00e1lculo laser relacionado (opcional)"
+    },
+    "prescription_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da prescri\u00e7\u00e3o"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "medicamento",
+              "manipulado",
+              "cosm\u00e9tico",
+              "dermocosmetico"
+            ],
+            "description": "Tipo do produto"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome do produto/medicamento"
+          },
+          "active_ingredient": {
+            "type": "string",
+            "description": "Princ\u00edpio ativo"
+          },
+          "dosage": {
+            "type": "string",
+            "description": "Dosagem/Concentra\u00e7\u00e3o"
+          },
+          "quantity": {
+            "type": "string",
+            "description": "Quantidade"
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Modo de usar"
+          }
+        }
+      },
+      "description": "Itens da receita"
+    },
+    "diagnosis": {
+      "type": "string",
+      "description": "Diagn\u00f3stico/Indica\u00e7\u00e3o"
+    },
+    "observations": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es gerais"
+    },
+    "signature_data": {
+      "type": "string",
+      "description": "Dados da assinatura digital (base64)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "finalizada",
+        "enviada"
+      ],
+      "default": "rascunho",
+      "description": "Status da receita"
+    }
+  },
+  "required": [
+    "prescription_date"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
