@@ -1,0 +1,55 @@
+{
+  "name": "AnalyticsEvent",
+  "type": "object",
+  "properties": {
+    "event_name": {
+      "type": "string",
+      "description": "Nome do evento (page_view, page_stay, page_leave)"
+    },
+    "page": {
+      "type": "string",
+      "description": "Rota/p\u00e1gina"
+    },
+    "duration_ms": {
+      "type": "number",
+      "description": "Dura\u00e7\u00e3o em milissegundos"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "ID da sess\u00e3o do usu\u00e1rio"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email do usu\u00e1rio (se autenticado)"
+    }
+  },
+  "required": [
+    "event_name",
+    "page"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
