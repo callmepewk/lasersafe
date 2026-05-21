@@ -1,0 +1,247 @@
+{
+  "name": "LaserCalculation",
+  "type": "object",
+  "properties": {
+    "patient_id": {
+      "type": "string",
+      "description": "ID do paciente"
+    },
+    "professional_id": {
+      "type": "string",
+      "description": "ID do profissional"
+    },
+    "procedure_type": {
+      "type": "string",
+      "description": "Tipo de procedimento"
+    },
+    "other_procedure_type": {
+      "type": "string",
+      "description": "Procedimento especificado se 'Outro' for selecionado"
+    },
+    "region": {
+      "type": "string",
+      "description": "Regi\u00e3o do corpo tratada"
+    },
+    "phototype": {
+      "type": "string",
+      "enum": [
+        "I",
+        "II",
+        "III",
+        "IV",
+        "V",
+        "VI"
+      ],
+      "description": "Fototipo do paciente"
+    },
+    "patient_age": {
+      "type": "integer",
+      "description": "Idade do paciente"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "masculino",
+        "feminino",
+        "outro"
+      ],
+      "description": "G\u00eanero do paciente no momento da avalia\u00e7\u00e3o"
+    },
+    "skin_sensitivity": {
+      "type": "string",
+      "description": "Sensibilidade da pele"
+    },
+    "target_type": {
+      "type": "string",
+      "description": "Tipo de alvo"
+    },
+    "laser_type": {
+      "type": "string",
+      "description": "Tipo de laser/tecnologia utilizada"
+    },
+    "other_laser_type": {
+      "type": "string",
+      "description": "Laser especificado se 'Outro' for selecionado"
+    },
+    "handpiece_type": {
+      "type": "string",
+      "description": "Tipo de ponteira utilizada"
+    },
+    "fluence_unit": {
+      "type": "string",
+      "description": "Unidade de medida para a flu\u00eancia/energia"
+    },
+    "aggressiveness_level": {
+      "type": "string",
+      "enum": [
+        "conservador",
+        "moderado",
+        "agressivo"
+      ],
+      "description": "N\u00edvel de agressividade do tratamento"
+    },
+    "fluence": {
+      "type": "string",
+      "description": "Flu\u00eancia calculada (J/cm\u00b2)"
+    },
+    "pulse_duration": {
+      "type": "string",
+      "description": "Dura\u00e7\u00e3o do pulso calculada (ms)"
+    },
+    "frequency": {
+      "type": "string",
+      "description": "Frequ\u00eancia calculada (Hz)"
+    },
+    "spot_size": {
+      "type": "string",
+      "description": "Tamanho do spot calculado (mm)"
+    },
+    "cooling_intensity": {
+      "type": "string",
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "description": "Intensidade do resfriamento da ponteira (1-5)"
+    },
+    "safety_factor": {
+      "type": "number",
+      "description": "Fator de seguran\u00e7a aplicado"
+    },
+    "intensity_modulator": {
+      "type": "number",
+      "description": "Modulador de intensidade"
+    },
+    "key_parameter": {
+      "type": "string",
+      "description": "Par\u00e2metro chave do c\u00e1lculo"
+    },
+    "treatment_notes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es do c\u00e1lculo"
+    },
+    "session_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data da sess\u00e3o de tratamento"
+    },
+    "skin_color": {
+      "type": "string"
+    },
+    "sun_exposure": {
+      "type": "string"
+    },
+    "tanning_habits": {
+      "type": "string"
+    },
+    "glogau_scale": {
+      "type": "string",
+      "description": "Escala de Glogau"
+    },
+    "acne_scar_classification": {
+      "type": "string",
+      "description": "Classifica\u00e7\u00e3o de Cicatrizes de Acne"
+    },
+    "leeds_acne_scale": {
+      "type": "string",
+      "description": "Escala de Acne (Leeds)"
+    },
+    "is_adjusted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Indica se os par\u00e2metros foram ajustados manualmente"
+    },
+    "adjustment_reasoning": {
+      "type": "string",
+      "description": "Justificativa da IA para o ajuste"
+    },
+    "original_parameters": {
+      "type": "string",
+      "description": "Par\u00e2metros originais sugeridos pela IA, em formato JSON"
+    },
+    "beam_shape": {
+      "type": "string",
+      "description": "Forma do feixe: quadrado, tri\u00e2ngulo, c\u00edrculo, ret\u00e2ngulo, hex\u00e1gono"
+    },
+    "scan_area": {
+      "type": "string",
+      "description": "\u00c1rea de varredura (ex: 5x5mm, 10x10mm, 20x20mm)"
+    },
+    "scan_area_custom": {
+      "type": "string",
+      "description": "\u00c1rea de varredura personalizada"
+    },
+    "dot_density": {
+      "type": "string",
+      "description": "Densidade de pontos (Dots/cm\u00b2) - 100 a 3000"
+    },
+    "application_pattern": {
+      "type": "string",
+      "description": "Padr\u00e3o de aplica\u00e7\u00e3o: array, grid, random"
+    },
+    "depth_level": {
+      "type": "string",
+      "description": "N\u00edvel de profundidade (1-5)"
+    },
+    "energy_mj": {
+      "type": "string",
+      "description": "Energia em mJ (5-150)"
+    },
+    "pulse_width_ms": {
+      "type": "string",
+      "description": "Tempo de pulso em ms"
+    },
+    "scan_mode": {
+      "type": "string",
+      "description": "Modo de varredura: linear, espiral, cruzado"
+    }
+  },
+  "required": [
+    "patient_id",
+    "professional_id",
+    "procedure_type",
+    "phototype"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
