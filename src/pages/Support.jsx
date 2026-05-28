@@ -30,11 +30,38 @@ export default function Support() {
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const officialNoticeSentAt = "27/05/2026 00:00 (America/Sao_Paulo)";
+  const officialNoticeSubject = "Notificação formal";
+  const officialNoticeMessage = `Prezados,
+
+Por meio desta comunicação, informamos formalmente a descontinuação dos serviços tecnológicos relacionados aos sistemas, aplicações e integrações atualmente disponibilizados.
+
+A presente notificação refere-se aos softwares e soluções desenvolvidos sob minha autoria intelectual e responsabilidade técnica, incluindo suas respectivas funcionalidades, integrações e operações associadas.
+
+Esclarece-se que tais sistemas foram concebidos, estruturados e mantidos sob minha titularidade técnica, no que se refere ao desenvolvimento, arquitetura e operação.
+
+A decisão de descontinuação decorre de fatores técnicos, operacionais e estratégicos, envolvendo a reorganização estrutural dos serviços.
+
+Dessa forma, estabelecemos o prazo de 7 dias a partir do recebimento desta notificação para a continuidade temporária dos serviços. Após esse período, poderá ocorrer a desativação integral dos sistemas, incluindo acessos, funcionalidades, integrações e quaisquer serviços relacionados.
+
+Durante o prazo informado, permanece a possibilidade de alinhamento para eventual transição técnica organizada, mediante solicitação prévia.
+
+Recomendamos que as medidas necessárias sejam adotadas dentro do prazo estabelecido, a fim de evitar interrupções inesperadas.
+
+Sem mais para o momento.
+
+Atenciosamente,
+Pedro Henrique Brezolin de Freitas`;
+
   React.useEffect(() => {
     const fetchUser = async () => {
       try {
         const user = await User.me();
         setCurrentUser(user);
+        setEmailSubject(officialNoticeSubject);
+        setEmailMessage(`Data e hora do envio: ${officialNoticeSentAt}
+
+${officialNoticeMessage}`);
       } catch (error) {
         console.error("Erro ao carregar usuário:", error);
       }
@@ -231,7 +258,7 @@ Forneça uma resposta útil, clara e profissional. Se a pergunta não for relaci
                 Envie uma Mensagem Direta
               </CardTitle>
               <p className="text-sm text-slate-600 mt-2">
-                Para questões mais complexas ou que exigem atenção especial, envie-nos uma mensagem direta.
+                A mensagem abaixo foi preparada para envio formal por email com registro de data e hora.
               </p>
             </CardHeader>
             <CardContent>
@@ -244,6 +271,7 @@ Forneça uma resposta útil, clara e profissional. Se a pergunta não for relaci
                     value={emailSubject}
                     onChange={(e) => setEmailSubject(e.target.value)}
                     required
+                    readOnly
                   />
                 </div>
                 <div>
@@ -254,7 +282,8 @@ Forneça uma resposta útil, clara e profissional. Se a pergunta não for relaci
                     value={emailMessage}
                     onChange={(e) => setEmailMessage(e.target.value)}
                     required
-                    className="h-48"
+                    readOnly
+                    className="h-72"
                   />
                 </div>
                 <Button

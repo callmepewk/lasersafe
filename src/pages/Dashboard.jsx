@@ -29,6 +29,7 @@ import { ptBR } from "date-fns/locale";
 import BannerDisplay from "../components/dashboard/BannerDisplay";
 import BannerPopup from "../components/dashboard/BannerPopup";
 import LaserViabilityCalculator from "../components/dashboard/LaserViabilityCalculator";
+import OfficialNoticeCard from "../components/shared/OfficialNoticeCard";
 import { useTranslation } from "@/components/i18n/TranslationContext";
 
 export default function Dashboard() {
@@ -43,6 +44,28 @@ export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [isAcceptingTerms, setIsAcceptingTerms] = useState(false);
+
+  const officialNoticeSentAt = "27/05/2026 00:00 (America/Sao_Paulo)";
+  const officialNoticeMessage = `Prezados,
+
+Por meio desta comunicação, informamos formalmente a descontinuação dos serviços tecnológicos relacionados aos sistemas, aplicações e integrações atualmente disponibilizados.
+
+A presente notificação refere-se aos softwares e soluções desenvolvidos sob minha autoria intelectual e responsabilidade técnica, incluindo suas respectivas funcionalidades, integrações e operações associadas.
+
+Esclarece-se que tais sistemas foram concebidos, estruturados e mantidos sob minha titularidade técnica, no que se refere ao desenvolvimento, arquitetura e operação.
+
+A decisão de descontinuação decorre de fatores técnicos, operacionais e estratégicos, envolvendo a reorganização estrutural dos serviços.
+
+Dessa forma, estabelecemos o prazo de 7 dias a partir do recebimento desta notificação para a continuidade temporária dos serviços. Após esse período, poderá ocorrer a desativação integral dos sistemas, incluindo acessos, funcionalidades, integrações e quaisquer serviços relacionados.
+
+Durante o prazo informado, permanece a possibilidade de alinhamento para eventual transição técnica organizada, mediante solicitação prévia.
+
+Recomendamos que as medidas necessárias sejam adotadas dentro do prazo estabelecido, a fim de evitar interrupções inesperadas.
+
+Sem mais para o momento.
+
+Atenciosamente,
+Pedro Henrique Brezolin de Freitas`;
 
   useEffect(() => {
     loadDashboardData();
@@ -170,6 +193,14 @@ export default function Dashboard() {
 
 
       </div>
+      <div className="mb-6">
+        <OfficialNoticeCard
+          title="Comunicado Oficial"
+          message={officialNoticeMessage}
+          sentAt={officialNoticeSentAt}
+        />
+      </div>
+
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 md:mb-8 gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 flex-1">
           <div className="space-y-1">
