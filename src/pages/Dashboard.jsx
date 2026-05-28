@@ -45,7 +45,7 @@ export default function Dashboard() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [isAcceptingTerms, setIsAcceptingTerms] = useState(false);
 
-  const officialNoticeSentAt = "27/05/2026 00:00 (America/Sao_Paulo)";
+  const officialNoticeSentAt = "28/05/2026 00:00 (America/Sao_Paulo)";
   const officialNoticeMessage = `Prezados,
 
 Por meio desta comunicação, informamos formalmente a descontinuação dos serviços tecnológicos relacionados aos sistemas, aplicações e integrações atualmente disponibilizados.

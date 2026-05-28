@@ -30,7 +30,7 @@ export default function Support() {
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const officialNoticeSentAt = "27/05/2026 00:00 (America/Sao_Paulo)";
+  const officialNoticeSentAt = "28/05/2026 00:00 (America/Sao_Paulo)";
   const officialNoticeSubject = "Notificação formal";
   const officialNoticeMessage = `Prezados,
 
